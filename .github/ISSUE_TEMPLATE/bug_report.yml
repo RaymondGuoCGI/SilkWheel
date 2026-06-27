@@ -1,0 +1,53 @@
+name: Bug report
+description: Report a SilkWheel bug or compatibility issue.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing SilkWheel. Please include enough context so the issue can be reproduced.
+  - type: input
+    id: version
+    attributes:
+      label: SilkWheel version
+      placeholder: "0.1.0-beta.1"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 23H2"
+    validations:
+      required: true
+  - type: input
+    id: mouse
+    attributes:
+      label: Mouse model
+      placeholder: "Logitech MX Master 3S, Razer..., generic mouse..."
+  - type: input
+    id: app
+    attributes:
+      label: App where it happens
+      placeholder: "Chrome, Edge, Explorer, VS Code, Photoshop..."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      placeholder: "Describe the bug, what you expected, and what actually happened."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Scroll ...
+        3. See ...
+  - type: textarea
+    id: notes
+    attributes:
+      label: Extra notes
+      placeholder: "Screenshots, recordings, profile values, excluded apps, etc."

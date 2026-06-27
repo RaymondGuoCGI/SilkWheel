@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Website feedback form
+    url: https://silkwheel.raymondstudio.cn/#feedback
+    about: Send private beta feedback through the SilkWheel website.
+  - name: Public feedback repo
+    url: https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues
+    about: Public feedback and discussion for SilkWheel.

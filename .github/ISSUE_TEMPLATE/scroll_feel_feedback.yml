@@ -1,0 +1,62 @@
+name: Scroll feel feedback
+description: Share how SilkWheel feels with your mouse and apps.
+title: "[Feedback]: "
+labels: ["feedback", "scroll-feel"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This beta is tuned through real usage feedback. Short notes are welcome.
+  - type: input
+    id: version
+    attributes:
+      label: SilkWheel version
+      placeholder: "0.1.0-beta.1"
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 10/11 version"
+  - type: input
+    id: mouse
+    attributes:
+      label: Mouse model
+      placeholder: "Mouse brand/model"
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Profile tested
+      options:
+        - Profile A - Quick
+        - Profile B - Medium
+        - Zero - Native wheel
+        - Custom
+  - type: checkboxes
+    id: apps
+    attributes:
+      label: Apps tested
+      options:
+        - label: Chrome / Edge
+        - label: File Explorer
+        - label: VS Code / editor
+        - label: Office / PDF reader
+        - label: Design or creative app
+        - label: Other
+  - type: dropdown
+    id: rating
+    attributes:
+      label: Overall feel
+      options:
+        - Much smoother than native wheel
+        - Slightly smoother
+        - About the same
+        - Too fast
+        - Too slow
+        - Feels jumpy or wobbly
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What should be improved?
+      placeholder: "Tell us what feels good, what stutters, and where you tested it."
+    validations:
+      required: true

@@ -1,82 +1,101 @@
 # SilkWheel
 
-[English](#english) | [中文](#中文)
+![SilkWheel logo](Resources/silkwheel-logo-128.png)
 
-## English
+**Smooth mouse wheel scrolling for Windows.**
 
-SilkWheel is a Windows tray utility that turns stepped mouse wheel input into a calmer, smoother, more controllable glide.
+SilkWheel is a lightweight Windows tray utility that turns stepped mouse wheel input into a calmer, smoother, more controllable glide.
 
-The default feel is tuned from a SmoothScroll-style profile:
+[Website](https://silkwheel.raymondstudio.cn/) · [Download](https://github.com/RaymondGuoCGI/SilkWheel/releases/latest) · [Feedback](https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues) · [中文](#中文)
 
-- Step size: 120
-- Animation time: 540 ms
-- Acceleration delta: 50 ms
-- Max acceleration: 7x
-- Pulse easing: enabled
-- Pulse scale: 3
-- Lines per notch: 1
+> Current status: public beta. Free for 21 days; after that, share one real feedback note to keep using the current beta.
 
-### Free Beta
+## Why SilkWheel
 
-SilkWheel is currently a free beta. Use it free for 21 days. After that, share one real feedback note to keep using the current beta version.
+Many Windows apps still treat mouse wheel input as obvious stepped jumps. SilkWheel sits between the wheel and the foreground app, intercepts wheel ticks, and re-emits smaller eased wheel pulses so pages, editors, file lists, and documents feel less harsh.
 
-- Website: https://silkwheel.raymondstudio.cn/
-- Public feedback: https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues
-- Website feedback form: saved by the SilkWheel VPS feedback API
+SilkWheel is designed for people who:
 
-Maintainer feedback panel:
+- miss macOS-like inertial scrolling on Windows
+- use a regular mouse instead of a precision touchpad
+- read long pages, code, docs, PDFs, or file lists every day
+- want per-app exclusions when a program should keep native wheel behavior
+- prefer a tray app that stays quiet until needed
 
-`https://silkwheel.raymondstudio.cn/admin/feedback`
+## Features
 
-The admin panel is protected by HTTP Basic Auth. Credentials are configured outside the repository.
+- System-wide vertical smooth scrolling for Windows 10/11
+- Tuned A/B/native profiles for quick comparison
+- Per-app exclusion list
+- Tray controls and start-with-Windows option
+- Light, gray, dark, and custom themes
+- Chinese and English UI
+- Local settings file, no telemetry
 
-### Support Development
+## Download
 
-Optional support is welcome, but it is separate from beta access and never required.
+Get the latest beta from GitHub Releases:
 
-- PayPal: https://paypal.me/raymondguocgi
-- Quick support: [$5](https://paypal.me/raymondguocgi/5USD) / [$10](https://paypal.me/raymondguocgi/10USD) / [$20](https://paypal.me/raymondguocgi/20USD) / [As you like](https://paypal.me/raymondguocgi)
+[Download SilkWheel for Windows](https://github.com/RaymondGuoCGI/SilkWheel/releases/latest)
 
-### Run
+Windows may show a warning because this early beta is not code-signed yet. This is expected for new unsigned desktop apps. The source is public so you can inspect how the app works before running it.
 
-Published executable:
+## How It Works
 
-`bin\Release\net8.0-windows\win-x64\publish\SilkWheel.exe`
+SilkWheel uses a standard Windows low-level mouse hook (`WH_MOUSE_LL`) to detect wheel events. For non-injected wheel events, it can swallow the original tick and send multiple smaller wheel deltas through `SendInput` using a pulse/ease-out curve.
 
-Double-clicking SilkWheel opens the settings window and keeps the app running from the system tray. Left-click the tray icon to open settings. Right-click it to enable, pause, or exit.
+Important details:
 
-### Install Locally
+- It only smooths mouse wheel input.
+- It ignores injected events to avoid recursion.
+- It does not record keyboard input.
+- It does not upload app settings or usage data.
+- Settings are stored locally in `%AppData%\SilkWheel\settings.json`.
 
-```powershell
-.\Install-SilkWheel.ps1
-```
+See [Security and Privacy](SECURITY_AND_PRIVACY.md) for more detail.
 
-The installer copies SilkWheel to `%LocalAppData%\Programs\SilkWheel`, creates a Start Menu shortcut, and starts the app. Start-with-Windows uses `--background` so login launch goes straight to the tray without popping the settings window.
+## Beta Feedback
 
-### Settings
+The current beta is feedback-supported, not payment-gated.
 
-Settings are stored at:
+Please tell us:
 
-`%AppData%\SilkWheel\settings.json`
+- Windows version
+- mouse model
+- apps tested
+- selected profile
+- whether the scroll tail feels smooth, jumpy, too fast, or too slow
 
-Excluded apps are empty by default. Add apps from Settings when a specific program should keep its native wheel behavior.
+Use one of these channels:
 
-### Build
+- Website feedback form: https://silkwheel.raymondstudio.cn/#feedback
+- GitHub Issues: https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues
+- This repository's issue templates for bugs or scroll-feel feedback
+
+## Build From Source
+
+Requirements:
+
+- Windows 10/11
+- .NET 8 SDK
 
 ```powershell
 dotnet build
 dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
-On the VPS, website feedback submissions are stored at:
+Published files are generated under:
 
-`/var/lib/silkwheel-feedback/feedback.jsonl`
-
-To inspect recent feedback:
-
-```bash
-tail -n 20 /var/lib/silkwheel-feedback/feedback.jsonl
+```text
+bin\Release\net8.0-windows\win-x64\publish
 ```
+
+## Optional Support
+
+Optional support is welcome, but it is separate from beta access and never required.
+
+- PayPal: https://paypal.me/raymondguocgi
+- Quick support: [$5](https://paypal.me/raymondguocgi/5USD) / [$10](https://paypal.me/raymondguocgi/10USD) / [$20](https://paypal.me/raymondguocgi/20USD) / [As you like](https://paypal.me/raymondguocgi)
 
 ---
 
@@ -84,73 +103,33 @@ tail -n 20 /var/lib/silkwheel-feedback/feedback.jsonl
 
 SilkWheel 是一款 Windows 托盘工具，用来把生硬的一格一格鼠标滚轮输入，变成更自然、更稳定、更可控的惯性滑动。
 
-默认手感来自 SmoothScroll 风格参数调校：
+官网：[https://silkwheel.raymondstudio.cn/](https://silkwheel.raymondstudio.cn/)<br>
+下载：[GitHub Releases](https://github.com/RaymondGuoCGI/SilkWheel/releases/latest)<br>
+反馈：[SilkWheel Feedback](https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues)
 
-- 单次滚动强度：120
-- 动画时长：540 ms
-- 加速窗口：50 ms
-- 最大加速倍数：7x
-- Pulse 缓动：开启
-- Pulse 强度：3
-- 每格滚动行数：1
+### 适合谁
 
-### 免费 Beta
+- 想让 Windows 普通鼠标滚轮更接近惯性滚动的人
+- 长时间浏览网页、文档、代码、文件列表的人
+- 希望某些应用保留原生滚轮行为的人
+- 想自己比较不同滚动手感方案的人
+
+### 当前 Beta 规则
 
 SilkWheel 目前处于免费公测阶段。你可以免费使用 21 天；到期后，只需要提交一次真实使用反馈，就可以继续使用当前 Beta 版本。
 
-- 官网：https://silkwheel.raymondstudio.cn/
-- 公开反馈区：https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues
-- 官网反馈表单：会直接保存到 SilkWheel 的 VPS 反馈接口
+### 隐私和安全
 
-维护者反馈面板：
+- 使用 `WH_MOUSE_LL` 捕获鼠标滚轮事件
+- 使用 `SendInput` 注入平滑滚动事件
+- 不记录键盘输入
+- 不上传设置或使用数据
+- 设置保存在 `%AppData%\SilkWheel\settings.json`
 
-`https://silkwheel.raymondstudio.cn/admin/feedback`
-
-管理面板受 HTTP Basic Auth 保护，账号信息不提交到仓库。
+详情见 [Security and Privacy](SECURITY_AND_PRIVACY.md)。
 
 ### 支持开发
 
 如果 SilkWheel 改善了你的日常滚动体验，欢迎通过微信自愿支持开发。打赏和 Beta 使用、解锁完全分开，不是强制要求。
 
 ![微信收款码](website/assets/wechat-support-qr.png)
-
-### 运行
-
-发布后的可执行文件：
-
-`bin\Release\net8.0-windows\win-x64\publish\SilkWheel.exe`
-
-双击 SilkWheel 会打开设置窗口，同时程序会常驻系统托盘。左键点击托盘图标打开设置；右键可以启用、暂停或退出。
-
-### 本地安装
-
-```powershell
-.\Install-SilkWheel.ps1
-```
-
-安装脚本会把 SilkWheel 复制到 `%LocalAppData%\Programs\SilkWheel`，创建开始菜单快捷方式并启动程序。开机启动会使用 `--background`，登录后直接进入托盘，不会自动弹出设置窗口。
-
-### 设置
-
-设置文件保存位置：
-
-`%AppData%\SilkWheel\settings.json`
-
-排除应用默认为空。遇到某个软件需要保留原生滚轮行为时，可以在设置里手动添加。
-
-### 构建
-
-```powershell
-dotnet build
-dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
-```
-
-VPS 上的官网反馈数据保存位置：
-
-`/var/lib/silkwheel-feedback/feedback.jsonl`
-
-查看最近反馈：
-
-```bash
-tail -n 20 /var/lib/silkwheel-feedback/feedback.jsonl
-```
