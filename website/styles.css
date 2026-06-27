@@ -803,12 +803,28 @@ h3 {
 
   nav {
     width: 100%;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow: visible;
     padding-bottom: 2px;
+    gap: 14px 18px;
   }
 
   .language-picker {
-    flex: 0 0 auto;
+    order: 2;
+    width: 100%;
+    max-width: 280px;
+    margin-top: 2px;
+    justify-content: space-between;
+    overflow: visible;
+  }
+
+  .language-button {
+    min-width: 126px;
+  }
+
+  .language-menu {
+    right: auto;
+    left: 0;
   }
 
   .hero {
