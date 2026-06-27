@@ -1,4 +1,4 @@
-# I Built SilkWheel, a Small Windows App That Makes Mouse Wheel Scrolling Feel Smoother
+# SilkWheel: Smooth Mouse Wheel Scrolling for Windows
 
 I recently built a small Windows utility called **SilkWheel**.
 
