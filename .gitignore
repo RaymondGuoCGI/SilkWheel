@@ -1,0 +1,14 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+*.log
+
+# Local build and published binaries are produced by release scripts.
+website/download/*.exe
+website/download/*.zip
+
+# Local runtime settings.
+settings.json

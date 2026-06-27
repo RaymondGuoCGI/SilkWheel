@@ -1,0 +1,44 @@
+# SilkWheel
+
+SilkWheel is a Windows tray utility that adds SmoothScroll-style smooth mouse wheel scrolling system-wide.
+
+The default feel is based on the SmoothScroll 1.2.4 settings found on this machine:
+
+- Step size: 120
+- Animation time: 540 ms
+- Acceleration delta: 50 ms
+- Max acceleration: 7x
+- Pulse easing: enabled
+- Pulse scale: 3
+- Lines per notch: 1
+
+## Run
+
+Published executable:
+
+`bin\Release\net8.0-windows\win-x64\publish\SilkWheel.exe`
+
+Double-clicking SilkWheel opens the settings window and keeps the app running from the system tray. Left-click the tray icon to open settings. Right-click it to enable, pause, or exit.
+
+## Install Locally
+
+```powershell
+.\Install-SilkWheel.ps1
+```
+
+The installer copies SilkWheel to `%LocalAppData%\Programs\SilkWheel`, creates a Start Menu shortcut, and starts the app. Start-with-Windows uses `--background` so login launch goes straight to the tray without popping the settings window.
+
+## Settings
+
+Settings are stored at:
+
+`%AppData%\SilkWheel\settings.json`
+
+Excluded apps are empty by default. Add apps from Settings when a specific program should keep its native wheel behavior.
+
+## Build
+
+```powershell
+dotnet build
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+```

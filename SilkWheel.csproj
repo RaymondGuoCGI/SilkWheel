@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <Version>0.1.0-beta.1</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.1</FileVersion>
+    <InformationalVersion>0.1.0-beta.1</InformationalVersion>
+    <Company>Raymond Studio</Company>
+    <Product>SilkWheel</Product>
+    <Description>SilkWheel smooth mouse wheel utility for Windows</Description>
+  </PropertyGroup>
+
+</Project>
