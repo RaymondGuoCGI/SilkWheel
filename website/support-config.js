@@ -5,5 +5,5 @@ window.SILKWHEEL_SUPPORT = {
   // paypalUrl: "https://www.paypal.com/donate/?hosted_button_id=YOUR_BUTTON_ID"
   paypalUrl: "",
 
-  wechatQr: "assets/wechat-support-qr.png"
+  wechatQr: "assets/wechat-support-qr.png?v=20260627-clean1"
 };
