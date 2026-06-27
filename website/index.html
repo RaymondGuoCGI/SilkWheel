@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://silkwheel.raymondstudio.cn/assets/silkwheel-logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/silkwheel-logo.png">
-  <link rel="stylesheet" href="styles.css?v=20260627-mobile-language1">
+  <link rel="stylesheet" href="styles.css?v=20260627-mobile-language2">
   <script src="support-config.js?v=20260627-paypal1"></script>
   <script type="application/ld+json">
   {
@@ -601,9 +601,26 @@
 
     const currentLanguage = detectLanguage();
     applyLanguage(currentLanguage);
+    function positionLanguageMenu() {
+      if (!languagePicker || !languageMenu || !window.matchMedia("(max-width: 720px)").matches) {
+        languageMenu?.style.removeProperty("top");
+        languageMenu?.style.removeProperty("left");
+        return;
+      }
+
+      const rect = languagePicker.getBoundingClientRect();
+      const menuWidth = 140;
+      const left = Math.min(Math.max(rect.left, 16), window.innerWidth - menuWidth - 16);
+      languageMenu.style.left = `${left}px`;
+      languageMenu.style.top = `${rect.bottom + 10}px`;
+    }
+
     languageButton?.addEventListener("click", () => {
       const isOpen = languagePicker?.classList.toggle("is-open");
       languageButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      if (isOpen) {
+        positionLanguageMenu();
+      }
     });
     languageMenu?.addEventListener("click", (event) => {
       const target = event.target.closest("[data-lang]");
@@ -618,6 +635,8 @@
         languageButton?.setAttribute("aria-expanded", "false");
       }
     });
+    window.addEventListener("resize", positionLanguageMenu);
+    window.addEventListener("scroll", positionLanguageMenu, { passive: true });
     feedbackTopicOptions?.addEventListener("click", (event) => {
       const target = event.target.closest("[data-topic-key]");
       if (!target) {

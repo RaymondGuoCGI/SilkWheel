@@ -803,28 +803,44 @@ h3 {
 
   nav {
     width: 100%;
-    flex-wrap: wrap;
-    overflow: visible;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
     padding-bottom: 2px;
-    gap: 14px 18px;
+    gap: 24px;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
   }
 
   .language-picker {
-    order: 2;
-    width: 100%;
-    max-width: 280px;
-    margin-top: 2px;
-    justify-content: space-between;
-    overflow: visible;
+    flex: 0 0 auto;
+    gap: 0;
+    min-height: 24px;
+  }
+
+  .language-picker > span {
+    font-size: 14px;
+    font-weight: 650;
   }
 
   .language-button {
-    min-width: 126px;
+    position: absolute;
+    inset: -8px -10px;
+    width: calc(100% + 20px);
+    min-width: 0;
+    height: 40px;
+    padding: 0;
+    opacity: 0;
   }
 
   .language-menu {
+    position: fixed;
     right: auto;
-    left: 0;
+    left: 20px;
+    min-width: 140px;
   }
 
   .hero {
