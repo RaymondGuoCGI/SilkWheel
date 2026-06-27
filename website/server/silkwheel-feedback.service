@@ -1,0 +1,20 @@
+[Unit]
+Description=SilkWheel feedback API
+After=network.target
+
+[Service]
+Type=simple
+Environment=HOST=127.0.0.1
+Environment=PORT=3097
+Environment=FEEDBACK_STORE_DIR=/var/lib/silkwheel-feedback
+WorkingDirectory=/opt/silkwheel-feedback
+ExecStart=/usr/bin/node /opt/silkwheel-feedback/feedback-server.js
+Restart=always
+RestartSec=3
+User=www-data
+Group=www-data
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

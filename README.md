@@ -26,7 +26,17 @@ SilkWheel is currently a free beta. Use it for 21 days; after that, share one re
 
 - Website: https://silkwheel.raymondstudio.cn/
 - Feedback: https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues
-- Email: support@raymondstudio.cn
+- Website feedback form: saved by the SilkWheel VPS feedback API
+
+On the VPS, feedback submissions are stored at:
+
+`/var/lib/silkwheel-feedback/feedback.jsonl`
+
+To inspect recent feedback:
+
+```bash
+tail -n 20 /var/lib/silkwheel-feedback/feedback.jsonl
+```
 
 Optional support is welcome, but it is separate from beta access and never required.
 

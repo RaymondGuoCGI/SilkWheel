@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://silkwheel.raymondstudio.cn/assets/silkwheel-logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/silkwheel-logo.png">
-  <link rel="stylesheet" href="styles.css?v=20260627-paypal-chips2">
+  <link rel="stylesheet" href="styles.css?v=20260627-feedback-api1">
   <script src="support-config-paypal-20260627.js"></script>
   <script type="application/ld+json">
   {
@@ -255,7 +255,6 @@
             Short notes are welcome.
           </p>
           <div class="feedback-links">
-            <a class="email-link" href="mailto:support@raymondstudio.cn">support@raymondstudio.cn</a>
             <a class="email-link" href="https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues" target="_blank" rel="noopener" data-i18n="feedback.github">GitHub Issues</a>
           </div>
         </div>
@@ -276,10 +275,10 @@
           </label>
           <label class="full">
             <span data-i18n="feedback.message">Message</span>
-            <textarea name="message" rows="5" placeholder="What should SilkWheel improve?" data-i18n-placeholder="feedback.messagePlaceholder"></textarea>
+            <textarea name="message" rows="5" minlength="5" required placeholder="What should SilkWheel improve?" data-i18n-placeholder="feedback.messagePlaceholder"></textarea>
           </label>
           <button class="button primary" type="submit" data-i18n="feedback.send">Send feedback</button>
-          <p class="form-note" data-i18n="feedback.note">This opens your email app. A server-side feedback inbox can be connected later.</p>
+          <p class="form-note" id="feedbackStatus" data-i18n="feedback.note">Feedback is saved directly to the SilkWheel beta inbox. If submission fails, use GitHub Issues.</p>
         </form>
       </div>
     </section>
@@ -287,7 +286,7 @@
 
   <footer class="site-footer">
     <span data-i18n="footer.brand">SilkWheel by Raymond Studio</span>
-    <a href="mailto:support@raymondstudio.cn">support@raymondstudio.cn</a>
+    <a href="https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues" target="_blank" rel="noopener" data-i18n="feedback.github">GitHub Issues</a>
   </footer>
   <script>
     const translations = {
@@ -390,7 +389,10 @@
         "feedback.message": "Message",
         "feedback.messagePlaceholder": "What should SilkWheel improve?",
         "feedback.send": "Send feedback",
-        "feedback.note": "This opens your email app. A server-side feedback inbox can be connected later.",
+        "feedback.note": "Feedback is saved directly to the SilkWheel beta inbox. If submission fails, use GitHub Issues.",
+        "feedback.sending": "Sending feedback...",
+        "feedback.success": "Thanks. Your feedback has been saved.",
+        "feedback.error": "Could not submit feedback right now. Please use GitHub Issues.",
         "footer.brand": "SilkWheel by Raymond Studio",
         mailSubjectPrefix: "SilkWheel feedback",
         mailFrom: "From",
@@ -495,7 +497,10 @@
         "feedback.message": "反馈内容",
         "feedback.messagePlaceholder": "你希望 SilkWheel 优化什么？",
         "feedback.send": "发送反馈",
-        "feedback.note": "当前会打开你的邮箱应用。后续可以接入服务器端反馈收集。",
+        "feedback.note": "反馈会直接保存到 SilkWheel Beta 收集箱。如果提交失败，可以使用 GitHub 反馈区。",
+        "feedback.sending": "正在发送反馈...",
+        "feedback.success": "谢谢，反馈已保存。",
+        "feedback.error": "暂时无法提交反馈，请使用 GitHub 反馈区。",
         "footer.brand": "SilkWheel by Raymond Studio",
         mailSubjectPrefix: "SilkWheel 使用反馈",
         mailFrom: "来自",
@@ -512,6 +517,7 @@
     const wechatSupportQr = document.querySelector("#wechatSupportQr");
     const feedbackTopic = document.querySelector("#feedbackTopic");
     const feedbackTopicOptions = document.querySelector("#feedbackTopicOptions");
+    const feedbackStatus = document.querySelector("#feedbackStatus");
 
     function detectLanguage() {
       const urlLang = new URLSearchParams(window.location.search).get("lang");
@@ -677,7 +683,7 @@
     });
 
     const feedbackForm = document.querySelector("#feedbackForm");
-    feedbackForm?.addEventListener("submit", (event) => {
+    feedbackForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const lang = document.documentElement.lang === "zh-CN" ? "zh" : "en";
       const copy = translations[lang] || translations.en;
@@ -685,14 +691,38 @@
       const email = String(data.get("email") || "").trim();
       const topic = String(data.get("topic") || "Feedback").trim();
       const message = String(data.get("message") || "").trim();
-      const body = [
-        email ? `${copy.mailFrom}: ${email}` : "",
-        `${copy.mailTopic}: ${topic}`,
-        "",
-        message
-      ].filter(Boolean).join("\n");
+      const submitButton = feedbackForm.querySelector("button[type='submit']");
 
-      window.location.href = `mailto:support@raymondstudio.cn?subject=${encodeURIComponent(`${copy.mailSubjectPrefix}: ${topic}`)}&body=${encodeURIComponent(body)}`;
+      if (feedbackStatus) {
+        feedbackStatus.textContent = copy["feedback.sending"];
+      }
+      submitButton?.setAttribute("disabled", "true");
+
+      try {
+        const response = await fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, topic, message, language: lang })
+        });
+
+        if (!response.ok) {
+          throw new Error("Feedback request failed");
+        }
+
+        feedbackForm.reset();
+        if (feedbackTopic) {
+          feedbackTopic.value = copy["feedback.topicScroll"];
+        }
+        if (feedbackStatus) {
+          feedbackStatus.textContent = copy["feedback.success"];
+        }
+      } catch {
+        if (feedbackStatus) {
+          feedbackStatus.textContent = copy["feedback.error"];
+        }
+      } finally {
+        submitButton?.removeAttribute("disabled");
+      }
     });
   </script>
 </body>
