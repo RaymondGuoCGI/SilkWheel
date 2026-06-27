@@ -75,6 +75,17 @@ nav {
   font-weight: 650;
 }
 
+nav a,
+.language-picker,
+.language-picker > span,
+.nav-download {
+  flex: 0 0 auto;
+  line-height: 1;
+  white-space: nowrap;
+  word-break: keep-all;
+  writing-mode: horizontal-tb;
+}
+
 nav a:hover {
   color: var(--white);
 }
@@ -846,7 +857,7 @@ h3 {
     overflow-x: auto;
     overflow-y: visible;
     padding-bottom: 2px;
-    gap: 24px;
+    gap: 26px;
     scrollbar-width: none;
   }
 
@@ -863,6 +874,22 @@ h3 {
   .language-picker > span {
     font-size: 14px;
     font-weight: 650;
+  }
+
+  nav a,
+  .language-picker > span {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .nav-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 58px;
+    min-height: 44px;
+    padding: 0 18px;
+    line-height: 1;
   }
 
   .language-button {
