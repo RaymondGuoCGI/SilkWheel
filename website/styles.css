@@ -673,9 +673,15 @@ h3 {
 
 .email-link {
   display: inline-flex;
-  margin-top: 10px;
   color: var(--accent);
   font-weight: 800;
+}
+
+.feedback-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 10px;
 }
 
 .feedback-form {
