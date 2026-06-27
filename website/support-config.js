@@ -5,6 +5,5 @@ window.SILKWHEEL_SUPPORT = {
   // paypalUrl: "https://www.paypal.com/donate/?hosted_button_id=YOUR_BUTTON_ID"
   paypalUrl: "",
 
-  // Replace with your real WeChat appreciation QR image when ready.
-  wechatQr: "assets/wechat-support-placeholder.svg"
+  wechatQr: "assets/wechat-support-qr.png"
 };
