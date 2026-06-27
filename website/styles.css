@@ -606,7 +606,8 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 28px;
+  margin-bottom: 10px;
 }
 
 #paypalDonateOptions .donate-chip {
