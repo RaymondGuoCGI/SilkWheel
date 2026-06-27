@@ -20,6 +20,23 @@ Published executable:
 
 Double-clicking SilkWheel opens the settings window and keeps the app running from the system tray. Left-click the tray icon to open settings. Right-click it to enable, pause, or exit.
 
+## Beta, Feedback, and Support
+
+SilkWheel is currently a free beta. Use it for 21 days; after that, share one real feedback note to keep using the current beta.
+
+- Website: https://silkwheel.raymondstudio.cn/
+- Feedback: https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues
+- Email: support@raymondstudio.cn
+
+Optional support is welcome, but it is separate from beta access and never required.
+
+- PayPal: https://paypal.me/raymondguocgi
+- PayPal quick tips: [$5](https://paypal.me/raymondguocgi/5USD) / [$10](https://paypal.me/raymondguocgi/10USD) / [$20](https://paypal.me/raymondguocgi/20USD)
+
+For WeChat support, scan the QR code:
+
+![WeChat support QR](website/assets/wechat-support-qr.png)
+
 ## Install Locally
 
 ```powershell

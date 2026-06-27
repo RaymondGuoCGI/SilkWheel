@@ -17,8 +17,8 @@
   <meta property="og:image" content="https://silkwheel.raymondstudio.cn/assets/silkwheel-logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/silkwheel-logo.png">
-  <link rel="stylesheet" href="styles.css?v=20260627-mobile-language2">
-  <script src="support-config.js?v=20260627-clean1"></script>
+  <link rel="stylesheet" href="styles.css?v=20260627-paypal-buttons1">
+  <script src="support-config-paypal-20260627.js"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -196,10 +196,16 @@
         <p data-i18n="support.text">If SilkWheel makes your daily scrolling feel better, you can optionally support development. This is separate from beta access and never required.</p>
       </div>
       <div class="support-grid">
-        <article class="support-card">
+        <article class="support-card paypal-card is-hidden" id="paypalSupportCard">
           <div class="support-icon paypal-icon">P</div>
           <h3 data-i18n="support.globalTitle">International users</h3>
-          <p data-i18n="support.globalText">Use PayPal or a creator-support link when it is connected. A small tip helps cover testing, signing, hosting, and future polish.</p>
+          <p data-i18n="support.globalText">Use PayPal, just like a simple open-source tip jar. A small tip helps cover testing, signing, hosting, and future polish.</p>
+          <div class="donate-options" id="paypalDonateOptions" aria-label="PayPal donation options">
+            <a class="donate-chip" href="#" data-paypal-amount="5" target="_blank" rel="noopener">$5</a>
+            <a class="donate-chip" href="#" data-paypal-amount="10" target="_blank" rel="noopener">$10</a>
+            <a class="donate-chip" href="#" data-paypal-amount="20" target="_blank" rel="noopener">$20</a>
+            <a class="donate-chip donate-chip-wide" href="#" data-paypal-amount="" target="_blank" rel="noopener" data-i18n="support.asYouLike">As you like</a>
+          </div>
           <a class="button paypal-button disabled-link" id="paypalSupportButton" href="#" aria-disabled="true" target="_blank" rel="noopener" data-i18n="support.paypalButton">Donate with PayPal</a>
           <p class="support-hint" data-i18n="support.paypalHint">PayPal link is not connected yet.</p>
         </article>
@@ -212,7 +218,7 @@
           <img class="wechat-qr" id="wechatSupportQr" src="assets/wechat-support-qr.png?v=20260627-clean1" alt="WeChat support QR code" data-i18n-alt="support.wechatAlt">
         </article>
       </div>
-      <p class="pricing-note" data-i18n="support.note">PayPal is not connected yet. WeChat support is available for Chinese users.</p>
+      <p class="pricing-note" data-i18n="support.note">PayPal and WeChat support are available. Donations are optional and separate from beta access.</p>
     </section>
 
     <section class="section faq" id="faq">
@@ -356,11 +362,12 @@
         "support.globalTitle": "International users",
         "support.globalText": "Use PayPal, just like a simple open-source tip jar. A small tip helps cover testing, signing, hosting, and future polish.",
         "support.paypalButton": "Donate with PayPal",
+        "support.asYouLike": "As you like",
         "support.paypalHint": "PayPal link is not connected yet.",
         "support.wechatTitle": "Chinese users",
         "support.wechatText": "Scan the WeChat appreciation code to support SilkWheel. You can also leave feedback first; that is already valuable.",
         "support.wechatAlt": "WeChat support QR code",
-        "support.note": "PayPal is not connected yet. WeChat support is available for Chinese users.",
+        "support.note": "PayPal and WeChat support are available. Donations are optional and separate from beta access.",
         "faq.eyebrow": "Questions",
         "faq.title": "Before you install.",
         "faq.driverQ": "Does SilkWheel replace my mouse driver?",
@@ -461,11 +468,12 @@
         "support.globalTitle": "海外用户",
         "support.globalText": "海外用户可以像支持开源工具一样通过 PayPal 自愿打赏。小额支持会用于测试、签名、服务器和后续打磨。",
         "support.paypalButton": "用 PayPal 打赏",
+        "support.asYouLike": "随心支持",
         "support.paypalHint": "PayPal 链接尚未接入。",
         "support.wechatTitle": "国内用户",
         "support.wechatText": "可以扫码支持 SilkWheel。你也可以先提交反馈，这本身已经很有价值。",
         "support.wechatAlt": "微信打赏二维码",
-        "support.note": "PayPal 链接尚未接入，国内用户可以先通过微信打赏支持。",
+        "support.note": "PayPal 和微信打赏已接入。打赏完全自愿，和 Beta 使用/解锁分开。",
         "faq.eyebrow": "常见问题",
         "faq.title": "安装前你可能想知道。",
         "faq.driverQ": "SilkWheel 会替换鼠标驱动吗？",
@@ -503,6 +511,8 @@
     const languageCurrent = document.querySelector("#languageCurrent");
     const languageMenu = document.querySelector("#languageMenu");
     const paypalSupportButton = document.querySelector("#paypalSupportButton");
+    const paypalSupportCard = document.querySelector("#paypalSupportCard");
+    const paypalDonateOptions = document.querySelector("#paypalDonateOptions");
     const wechatSupportQr = document.querySelector("#wechatSupportQr");
     const feedbackTopic = document.querySelector("#feedbackTopic");
     const feedbackTopicOptions = document.querySelector("#feedbackTopicOptions");
@@ -576,17 +586,30 @@
       const paypalUrl = String(support.paypalUrl || "").trim();
       if (paypalSupportButton) {
         if (paypalUrl) {
+          paypalSupportCard?.classList.remove("is-hidden");
           paypalSupportButton.href = paypalUrl;
           paypalSupportButton.classList.remove("disabled-link");
           paypalSupportButton.removeAttribute("aria-disabled");
+          paypalDonateOptions?.querySelectorAll("[data-paypal-amount]").forEach((link) => {
+            const amount = link.getAttribute("data-paypal-amount") || "";
+            link.href = getPaypalDonateUrl(paypalUrl, amount);
+            link.classList.remove("disabled-link");
+            link.removeAttribute("aria-disabled");
+          });
           const hint = paypalSupportButton.parentElement?.querySelector(".support-hint");
           if (hint) {
             hint.textContent = "";
           }
         } else {
+          paypalSupportCard?.classList.add("is-hidden");
           paypalSupportButton.href = "#";
           paypalSupportButton.classList.add("disabled-link");
           paypalSupportButton.setAttribute("aria-disabled", "true");
+          paypalDonateOptions?.querySelectorAll("[data-paypal-amount]").forEach((link) => {
+            link.href = "#";
+            link.classList.add("disabled-link");
+            link.setAttribute("aria-disabled", "true");
+          });
           const hint = paypalSupportButton.parentElement?.querySelector(".support-hint");
           if (hint && copy["support.paypalHint"]) {
             hint.textContent = copy["support.paypalHint"];
@@ -597,6 +620,21 @@
       if (wechatSupportQr && support.wechatQr) {
         wechatSupportQr.src = support.wechatQr;
       }
+    }
+
+    function getPaypalDonateUrl(baseUrl, amount) {
+      if (!amount) {
+        return baseUrl;
+      }
+
+      const normalizedBase = baseUrl.replace(/\/$/, "");
+      if (/paypal\.me/i.test(normalizedBase)) {
+        return `${normalizedBase}/${encodeURIComponent(amount)}USD`;
+      }
+
+      const url = new URL(baseUrl);
+      url.searchParams.set("amount", amount);
+      return url.toString();
     }
 
     const currentLanguage = detectLanguage();
