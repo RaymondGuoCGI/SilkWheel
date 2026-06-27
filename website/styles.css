@@ -665,7 +665,7 @@ h3 {
   height: 190px;
   padding: 10px;
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 20px;
 }
 
