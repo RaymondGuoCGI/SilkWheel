@@ -38,6 +38,12 @@ To inspect recent feedback:
 tail -n 20 /var/lib/silkwheel-feedback/feedback.jsonl
 ```
 
+Admin feedback panel:
+
+`https://silkwheel.raymondstudio.cn/admin/feedback`
+
+The panel is protected by HTTP Basic Auth. The password is configured on the VPS through a systemd override, not committed to the repository.
+
 Optional support is welcome, but it is separate from beta access and never required.
 
 - PayPal: https://paypal.me/raymondguocgi
