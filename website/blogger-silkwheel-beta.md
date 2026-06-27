@@ -43,6 +43,34 @@ That feedback matters more than early payment right now. I want to learn:
 
 Once the product is more mature, I may consider a more advanced version. But for now, the goal is simple: get real users, listen carefully, and improve the scrolling feel.
 
+## Feedback Goes Directly to the Project
+
+The website now includes a feedback form, so you do not need to open an email app or write a separate message somewhere else.
+
+When you send feedback from the SilkWheel website, it goes directly into the project feedback system. I can review it from a private feedback panel and use it to improve default profiles, app exclusions, UI details, and the scrolling engine itself.
+
+Short feedback is enough. For example:
+
+- which mouse you use
+- which apps you tested SilkWheel in
+- whether the scrolling feels too fast, too slow, jumpy, or comfortable
+- which profile feels best to you
+
+## Optional Support
+
+SilkWheel is not forcing payment during the beta. The current model is feedback-first: use it, tell me what feels good or bad, and help shape the product.
+
+If SilkWheel genuinely improves your daily scrolling experience, optional support is welcome:
+
+- international users can support development through PayPal
+- users in China can support through WeChat on the website
+
+Support is completely separate from beta access. It is not required to unlock the beta.
+
+## Bilingual Website
+
+The SilkWheel website now supports English and Chinese. The mobile layout has also been tuned so the language switch, download button, and navigation stay usable on phone screens.
+
 ## Try SilkWheel
 
 Website:

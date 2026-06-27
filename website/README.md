@@ -55,5 +55,6 @@ SilkWheel is currently positioned as a free beta:
 - 21 days of free use.
 - After that, users submit one short feedback note to continue using the current beta.
 - Donations are optional and separate from beta access.
-- International support can use a PayPal.me or PayPal Donate link.
-- WeChat support uses a QR image asset once provided.
+- International support uses PayPal: `https://paypal.me/raymondguocgi`.
+- WeChat support uses `assets/wechat-support-qr.png`.
+- Website feedback is submitted to the VPS feedback API and can be reviewed from the protected admin panel.
