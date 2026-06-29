@@ -243,7 +243,7 @@ async function loadDownloadStats(limit = 10) {
   }
 }
 
-async function handleAdminFeedback(req, res) {
+async function handleAdminDashboard(req, res) {
   if (!isAdminAuthorized(req)) {
     unauthorized(res);
     return;
@@ -287,7 +287,7 @@ async function handleAdminFeedback(req, res) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SilkWheel Feedback</title>
+  <title>SilkWheel Admin</title>
   <style>
     :root { color-scheme: dark; --bg: #0b100e; --panel: #151d19; --line: #31413a; --text: #f3fff1; --muted: #abc1b8; --accent: #27d7c9; }
     * { box-sizing: border-box; }
@@ -320,7 +320,7 @@ async function handleAdminFeedback(req, res) {
 <body>
   <header>
     <div>
-      <h1>SilkWheel Feedback</h1>
+      <h1>SilkWheel Admin</h1>
       <p class="count">${items.length} recent submission${items.length === 1 ? "" : "s"}</p>
     </div>
     <a href="/">Back to site</a>
@@ -355,8 +355,8 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    if (req.url === "/admin/feedback" && req.method === "GET") {
-      await handleAdminFeedback(req, res);
+    if ((req.url === "/admin" || req.url === "/admin/feedback") && req.method === "GET") {
+      await handleAdminDashboard(req, res);
       return;
     }
 
