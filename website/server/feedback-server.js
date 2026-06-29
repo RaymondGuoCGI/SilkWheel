@@ -7,6 +7,7 @@ const HOST = process.env.HOST || "127.0.0.1";
 const PORT = Number(process.env.PORT || 3097);
 const STORE_DIR = process.env.FEEDBACK_STORE_DIR || "/var/lib/silkwheel-feedback";
 const STORE_FILE = path.join(STORE_DIR, "feedback.jsonl");
+const ACCESS_LOG_FILE = process.env.ACCESS_LOG_FILE || "/var/log/nginx/silkwheel.raymondstudio.cn.access.log";
 const MAX_BODY_BYTES = 32 * 1024;
 const RATE_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT = 8;
@@ -175,6 +176,73 @@ async function loadFeedbackItems(limit = 200) {
   }
 }
 
+function isLikelyBot(userAgent) {
+  return /bot|crawler|spider|preview|slurp|curl|wget|python|scrapy|headless/i.test(userAgent || "");
+}
+
+function parseAccessLogLine(line) {
+  const match = line.match(/^(\S+) \S+ \S+ \[([^\]]+)\] "(\S+) ([^"]+?) HTTP\/[0-9.]+" (\d{3}) (\d+|-) "([^"]*)" "([^"]*)"/);
+  if (!match) {
+    return null;
+  }
+
+  const [, ip, time, method, url, status, bytes, referer, userAgent] = match;
+  return {
+    ip,
+    time,
+    method,
+    url,
+    status: Number(status),
+    bytes: bytes === "-" ? 0 : Number(bytes),
+    referer,
+    userAgent
+  };
+}
+
+async function loadDownloadStats(limit = 10) {
+  try {
+    const files = [ACCESS_LOG_FILE, `${ACCESS_LOG_FILE}.1`];
+    const textParts = [];
+    for (const file of files) {
+      try {
+        textParts.push(await fs.readFile(file, "utf8"));
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          throw error;
+        }
+      }
+    }
+    const text = textParts.join("\n");
+    const downloads = text
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map(parseAccessLogLine)
+      .filter(Boolean)
+      .filter((entry) => entry.method === "GET" && entry.status >= 200 && entry.status < 400 && entry.url.startsWith("/download/"));
+
+    const botDownloads = downloads.filter((entry) => isLikelyBot(entry.userAgent));
+    const humanDownloads = downloads.filter((entry) => !isLikelyBot(entry.userAgent));
+    const uniqueIps = new Set(humanDownloads.map((entry) => entry.ip));
+
+    return {
+      total: downloads.length,
+      likelyHuman: humanDownloads.length,
+      likelyBot: botDownloads.length,
+      uniqueIpCount: uniqueIps.size,
+      recent: downloads.slice(-limit).reverse()
+    };
+  } catch (error) {
+    return {
+      total: 0,
+      likelyHuman: 0,
+      likelyBot: 0,
+      uniqueIpCount: 0,
+      recent: [],
+      error: error.code === "ENOENT" ? "No access log yet." : error.message
+    };
+  }
+}
+
 async function handleAdminFeedback(req, res) {
   if (!isAdminAuthorized(req)) {
     unauthorized(res);
@@ -182,6 +250,7 @@ async function handleAdminFeedback(req, res) {
   }
 
   const items = await loadFeedbackItems();
+  const downloadStats = await loadDownloadStats();
   const rows = items.map((item) => `
     <article class="feedback-item">
       <div class="meta">
@@ -196,6 +265,18 @@ async function handleAdminFeedback(req, res) {
       </div>
       <details>
         <summary>Browser</summary>
+        <pre>${escapeHtml(item.userAgent || "-")}</pre>
+      </details>
+    </article>
+  `).join("");
+  const downloadRows = downloadStats.recent.map((item) => `
+    <article class="download-row">
+      <strong>${escapeHtml(item.url || "-")}</strong>
+      <span>${escapeHtml(item.time || "-")}</span>
+      <span>${escapeHtml(item.ip || "-")}</span>
+      <span>${escapeHtml(isLikelyBot(item.userAgent) ? "bot/automation" : "likely human")}</span>
+      <details>
+        <summary>User agent</summary>
         <pre>${escapeHtml(item.userAgent || "-")}</pre>
       </details>
     </article>
@@ -218,14 +299,22 @@ async function handleAdminFeedback(req, res) {
     .empty, .feedback-item { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
     .empty { padding: 24px; color: var(--muted); }
     .feedback-item { padding: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 1120px; margin: 0 auto 18px; }
+    .stat { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 18px; }
+    .stat strong { display: block; font-size: 30px; color: var(--accent); }
+    .stat span { color: var(--muted); font-size: 13px; }
     .meta, .details { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 13px; }
     .meta span, .details span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; }
     .message { white-space: pre-wrap; line-height: 1.65; margin: 16px 0; }
+    .download-list { max-width: 1120px; margin: 0 auto 20px; display: grid; gap: 10px; }
+    .download-list h2 { margin: 8px 0 0; }
+    .download-row { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 14px; display: grid; gap: 6px; color: var(--muted); }
+    .download-row strong { color: var(--text); overflow-wrap: anywhere; }
     details { margin-top: 12px; color: var(--muted); }
     summary { cursor: pointer; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); }
     a { color: var(--accent); }
-    @media (max-width: 720px) { body { padding: 20px; } header { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 720px) { body { padding: 20px; } header { align-items: flex-start; flex-direction: column; } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
@@ -236,6 +325,17 @@ async function handleAdminFeedback(req, res) {
     </div>
     <a href="/">Back to site</a>
   </header>
+  <section class="stats" aria-label="Beta stats">
+    <div class="stat"><strong>${items.length}</strong><span>feedback submissions</span></div>
+    <div class="stat"><strong>${downloadStats.total}</strong><span>download requests</span></div>
+    <div class="stat"><strong>${downloadStats.likelyHuman}</strong><span>likely human downloads</span></div>
+    <div class="stat"><strong>${downloadStats.uniqueIpCount}</strong><span>unique downloader IPs</span></div>
+  </section>
+  <section class="download-list">
+    <h2>Recent downloads</h2>
+    ${downloadStats.error ? `<div class="empty">${escapeHtml(downloadStats.error)}</div>` : ""}
+    ${downloadRows || '<div class="empty">No download requests yet.</div>'}
+  </section>
   <main>
     ${items.length ? rows : '<div class="empty">No feedback yet.</div>'}
   </main>
