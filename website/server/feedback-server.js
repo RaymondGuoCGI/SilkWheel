@@ -390,6 +390,7 @@ async function handleAdminDashboard(req, res) {
     .message { white-space: pre-wrap; line-height: 1.65; margin: 16px 0; }
     .download-list { max-width: 1120px; margin: 0 auto 20px; display: grid; gap: 10px; }
     .download-list h2 { margin: 8px 0 0; }
+    .download-note { color: var(--muted); font-size: 13px; margin: -2px 0 4px; }
     .download-row { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 14px; display: grid; gap: 6px; color: var(--muted); }
     .download-row strong { color: var(--text); overflow-wrap: anywhere; }
     details { margin-top: 12px; color: var(--muted); }
@@ -410,11 +411,12 @@ async function handleAdminDashboard(req, res) {
   <section class="stats" aria-label="Beta stats">
     <div class="stat"><strong>${items.length}</strong><span>feedback submissions</span></div>
     <div class="stat"><strong>${downloadStats.likelyHuman}</strong><span>estimated human downloads</span></div>
-    <div class="stat"><strong>${downloadStats.totalRequests}</strong><span>raw download requests</span></div>
     <div class="stat"><strong>${downloadStats.uniqueIpCount}</strong><span>unique downloader IPs</span></div>
+    <div class="stat"><strong>${downloadStats.likelyBot}</strong><span>bot / automation sessions</span></div>
   </section>
   <section class="download-list">
     <h2>Recent downloads</h2>
+    <p class="download-note">${downloadStats.totalRequests} raw HTTP request${downloadStats.totalRequests === 1 ? "" : "s"} collapsed into ${downloadStats.likelyHuman} estimated human download${downloadStats.likelyHuman === 1 ? "" : "s"}. Partial/resumed downloads can create multiple requests.</p>
     ${downloadStats.error ? `<div class="empty">${escapeHtml(downloadStats.error)}</div>` : ""}
     ${downloadRows || '<div class="empty">No download requests yet.</div>'}
   </section>
