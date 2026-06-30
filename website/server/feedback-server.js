@@ -2,6 +2,8 @@ const http = require("node:http");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const zlib = require("node:zlib");
+const { promisify } = require("node:util");
 
 const HOST = process.env.HOST || "127.0.0.1";
 const PORT = Number(process.env.PORT || 3097);
@@ -14,6 +16,7 @@ const RATE_LIMIT = 8;
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const hits = new Map();
+const gunzip = promisify(zlib.gunzip);
 
 function sendJson(res, status, body) {
   res.writeHead(status, {
@@ -201,11 +204,30 @@ function parseAccessLogLine(line) {
 
 async function loadDownloadStats(limit = 10) {
   try {
-    const files = [ACCESS_LOG_FILE, `${ACCESS_LOG_FILE}.1`];
+    const logDir = path.dirname(ACCESS_LOG_FILE);
+    const logBase = path.basename(ACCESS_LOG_FILE);
+    const files = (await fs.readdir(logDir))
+      .filter((file) => file === logBase || file.startsWith(`${logBase}.`))
+      .sort((a, b) => {
+        const rank = (file) => {
+          if (file === logBase) {
+            return 0;
+          }
+
+          const match = file.match(/\.(\d+)(?:\.gz)?$/);
+          return match ? Number(match[1]) : 9999;
+        };
+
+        return rank(a) - rank(b);
+      })
+      .map((file) => path.join(logDir, file));
     const textParts = [];
     for (const file of files) {
       try {
-        textParts.push(await fs.readFile(file, "utf8"));
+        const buffer = await fs.readFile(file);
+        textParts.push(file.endsWith(".gz")
+          ? (await gunzip(buffer)).toString("utf8")
+          : buffer.toString("utf8"));
       } catch (error) {
         if (error.code !== "ENOENT") {
           throw error;
