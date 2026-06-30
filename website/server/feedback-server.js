@@ -202,6 +202,62 @@ function parseAccessLogLine(line) {
   };
 }
 
+function parseAccessLogTime(value) {
+  const match = String(value || "").match(/^(\d{2})\/([A-Za-z]{3})\/(\d{4}):(\d{2}):(\d{2}):(\d{2}) ([+-])(\d{2})(\d{2})$/);
+  if (!match) {
+    return 0;
+  }
+
+  const months = {
+    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+  };
+  const [, day, month, year, hour, minute, second, sign, offsetHour, offsetMinute] = match;
+  const utc = Date.UTC(Number(year), months[month], Number(day), Number(hour), Number(minute), Number(second));
+  const offset = (Number(offsetHour) * 60 + Number(offsetMinute)) * 60 * 1000;
+  return sign === "+" ? utc - offset : utc + offset;
+}
+
+function collapseDownloadSessions(entries) {
+  const sessionWindowMs = 30 * 60 * 1000;
+  const sorted = [...entries].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+  const sessions = [];
+  const active = new Map();
+
+  for (const entry of sorted) {
+    const key = `${entry.ip}|${entry.url}|${entry.userAgent}`;
+    const previous = active.get(key);
+    if (previous && entry.timestamp - previous.lastTimestamp <= sessionWindowMs) {
+      previous.lastTimestamp = entry.timestamp;
+      previous.lastTime = entry.time;
+      previous.requests += 1;
+      previous.bytes += entry.bytes;
+      previous.statuses.add(entry.status);
+      previous.hasPartialContent ||= entry.status === 206;
+      continue;
+    }
+
+    const session = {
+      ...entry,
+      firstTime: entry.time,
+      lastTime: entry.time,
+      firstTimestamp: entry.timestamp,
+      lastTimestamp: entry.timestamp,
+      requests: 1,
+      bytes: entry.bytes,
+      statuses: new Set([entry.status]),
+      hasPartialContent: entry.status === 206
+    };
+    active.set(key, session);
+    sessions.push(session);
+  }
+
+  return sessions.map((session) => ({
+    ...session,
+    statuses: [...session.statuses].sort((a, b) => a - b).join(", ")
+  }));
+}
+
 async function loadDownloadStats(limit = 10) {
   try {
     const logDir = path.dirname(ACCESS_LOG_FILE);
@@ -240,22 +296,25 @@ async function loadDownloadStats(limit = 10) {
       .filter(Boolean)
       .map(parseAccessLogLine)
       .filter(Boolean)
+      .map((entry) => ({ ...entry, timestamp: parseAccessLogTime(entry.time) }))
       .filter((entry) => entry.method === "GET" && entry.status >= 200 && entry.status < 400 && entry.url.startsWith("/download/"));
 
     const botDownloads = downloads.filter((entry) => isLikelyBot(entry.userAgent));
     const humanDownloads = downloads.filter((entry) => !isLikelyBot(entry.userAgent));
-    const uniqueIps = new Set(humanDownloads.map((entry) => entry.ip));
+    const humanSessions = collapseDownloadSessions(humanDownloads);
+    const botSessions = collapseDownloadSessions(botDownloads);
+    const uniqueIps = new Set(humanSessions.map((entry) => entry.ip));
 
     return {
-      total: downloads.length,
-      likelyHuman: humanDownloads.length,
-      likelyBot: botDownloads.length,
+      totalRequests: downloads.length,
+      likelyHuman: humanSessions.length,
+      likelyBot: botSessions.length,
       uniqueIpCount: uniqueIps.size,
-      recent: downloads.slice(-limit).reverse()
+      recent: humanSessions.slice(-limit).reverse()
     };
   } catch (error) {
     return {
-      total: 0,
+      totalRequests: 0,
       likelyHuman: 0,
       likelyBot: 0,
       uniqueIpCount: 0,
@@ -294,9 +353,10 @@ async function handleAdminDashboard(req, res) {
   const downloadRows = downloadStats.recent.map((item) => `
     <article class="download-row">
       <strong>${escapeHtml(item.url || "-")}</strong>
-      <span>${escapeHtml(item.time || "-")}</span>
+      <span>${escapeHtml(item.firstTime || item.time || "-")}${item.lastTime && item.lastTime !== item.firstTime ? ` to ${escapeHtml(item.lastTime)}` : ""}</span>
       <span>${escapeHtml(item.ip || "-")}</span>
-      <span>${escapeHtml(isLikelyBot(item.userAgent) ? "bot/automation" : "likely human")}</span>
+      <span>${escapeHtml(`${item.requests || 1} request${item.requests === 1 ? "" : "s"}${item.hasPartialContent ? ", partial/resumed" : ""}`)}</span>
+      <span>${escapeHtml(`status ${item.statuses || item.status}`)}</span>
       <details>
         <summary>User agent</summary>
         <pre>${escapeHtml(item.userAgent || "-")}</pre>
@@ -349,8 +409,8 @@ async function handleAdminDashboard(req, res) {
   </header>
   <section class="stats" aria-label="Beta stats">
     <div class="stat"><strong>${items.length}</strong><span>feedback submissions</span></div>
-    <div class="stat"><strong>${downloadStats.total}</strong><span>download requests</span></div>
-    <div class="stat"><strong>${downloadStats.likelyHuman}</strong><span>likely human downloads</span></div>
+    <div class="stat"><strong>${downloadStats.likelyHuman}</strong><span>estimated human downloads</span></div>
+    <div class="stat"><strong>${downloadStats.totalRequests}</strong><span>raw download requests</span></div>
     <div class="stat"><strong>${downloadStats.uniqueIpCount}</strong><span>unique downloader IPs</span></div>
   </section>
   <section class="download-list">
