@@ -381,7 +381,7 @@ async function handleAdminDashboard(req, res) {
     .empty, .feedback-item { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
     .empty { padding: 24px; color: var(--muted); }
     .feedback-item { padding: 20px; }
-    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 1120px; margin: 0 auto 18px; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 1120px; margin: 0 auto 18px; }
     .stat { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 18px; }
     .stat strong { display: block; font-size: 30px; color: var(--accent); }
     .stat span { color: var(--muted); font-size: 13px; }
@@ -391,6 +391,8 @@ async function handleAdminDashboard(req, res) {
     .download-list { max-width: 1120px; margin: 0 auto 20px; display: grid; gap: 10px; }
     .download-list h2 { margin: 8px 0 0; }
     .download-note { color: var(--muted); font-size: 13px; margin: -2px 0 4px; }
+    .diagnostics { max-width: 1120px; margin: -6px auto 18px; color: var(--muted); font-size: 13px; }
+    .diagnostics summary { display: inline-flex; color: var(--accent); }
     .download-row { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 14px; display: grid; gap: 6px; color: var(--muted); }
     .download-row strong { color: var(--text); overflow-wrap: anywhere; }
     details { margin-top: 12px; color: var(--muted); }
@@ -412,11 +414,13 @@ async function handleAdminDashboard(req, res) {
     <div class="stat"><strong>${items.length}</strong><span>feedback submissions</span></div>
     <div class="stat"><strong>${downloadStats.likelyHuman}</strong><span>estimated human downloads</span></div>
     <div class="stat"><strong>${downloadStats.uniqueIpCount}</strong><span>unique downloader IPs</span></div>
-    <div class="stat"><strong>${downloadStats.likelyBot}</strong><span>bot / automation sessions</span></div>
   </section>
+  <details class="diagnostics">
+    <summary>Diagnostics</summary>
+    <p>${downloadStats.totalRequests} raw HTTP request${downloadStats.totalRequests === 1 ? "" : "s"} collapsed into ${downloadStats.likelyHuman} estimated human download${downloadStats.likelyHuman === 1 ? "" : "s"}. Bot / automation sessions: ${downloadStats.likelyBot}. Partial or resumed downloads can create multiple requests.</p>
+  </details>
   <section class="download-list">
     <h2>Recent downloads</h2>
-    <p class="download-note">${downloadStats.totalRequests} raw HTTP request${downloadStats.totalRequests === 1 ? "" : "s"} collapsed into ${downloadStats.likelyHuman} estimated human download${downloadStats.likelyHuman === 1 ? "" : "s"}. Partial/resumed downloads can create multiple requests.</p>
     ${downloadStats.error ? `<div class="empty">${escapeHtml(downloadStats.error)}</div>` : ""}
     ${downloadRows || '<div class="empty">No download requests yet.</div>'}
   </section>
