@@ -8,11 +8,19 @@ public sealed class SettingsStore
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     private readonly string _settingsPath;
 
-    public SettingsStore()
+    public SettingsStore() : this(Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "SilkWheel",
+        "settings.json"))
     {
-        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SilkWheel");
-        Directory.CreateDirectory(dir);
-        _settingsPath = Path.Combine(dir, "settings.json");
+    }
+
+    internal SettingsStore(string settingsPath)
+    {
+        _settingsPath = settingsPath;
+        var directory = Path.GetDirectoryName(_settingsPath)
+            ?? throw new ArgumentException("A settings directory is required.", nameof(settingsPath));
+        Directory.CreateDirectory(directory);
     }
 
     public AppSettings Load()
@@ -25,16 +33,15 @@ public sealed class SettingsStore
             return defaults;
         }
 
+        AppSettings settings;
+        bool settingsMigrated;
         try
         {
-            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(_settingsPath), Options);
-            settings ??= AppSettings.CreateDefault();
+            settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(_settingsPath), Options)
+                ?? AppSettings.CreateDefault();
             settings.EnsureProfiles();
-            if (settings.EnsureExcludedProcesses())
-            {
-                Save(settings);
-            }
-            return settings;
+            settingsMigrated = settings.EnsureExcludedProcesses();
+            settingsMigrated |= settings.NormalizeScrollRanges();
         }
         catch
         {
@@ -43,10 +50,40 @@ public sealed class SettingsStore
             defaults.EnsureExcludedProcesses();
             return defaults;
         }
+
+        if (settingsMigrated)
+        {
+            try
+            {
+                Save(settings);
+            }
+            catch
+            {
+                // Loading succeeded, so keep the normalized in-memory settings
+                // even when a read-only or temporarily locked file cannot be migrated.
+            }
+        }
+
+        return settings;
     }
 
     public void Save(AppSettings settings)
     {
-        File.WriteAllText(_settingsPath, JsonSerializer.Serialize(settings, Options));
+        var temporaryPath = $"{_settingsPath}.{Environment.ProcessId}.tmp";
+        try
+        {
+            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(settings, Options));
+            File.Move(temporaryPath, _settingsPath, overwrite: true);
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(temporaryPath);
+            }
+            catch
+            {
+            }
+        }
     }
 }

@@ -1,8 +1,11 @@
+using System.Collections.Concurrent;
+
 namespace SilkWheel.Services;
 
 public sealed class ScrollEngine : IDisposable
 {
     private const int FrameMs = 7;
+    private const int MaxCoalescedTailMs = 120;
     private const double TailSnapDelta = 1.25;
     private const int MaxAnimationsPerAxis = 18;
 
@@ -11,13 +14,19 @@ public sealed class ScrollEngine : IDisposable
     private readonly System.Threading.Timer _timer;
     private readonly List<ScrollAnimation> _vertical = new();
     private readonly List<ScrollAnimation> _horizontal = new();
+    private readonly ConcurrentQueue<PendingInjection> _pendingInjections = new();
     private double _verticalCarry;
     private double _horizontalCarry;
+    private bool _verticalImmediateMode;
+    private bool _horizontalImmediateMode;
+    private long _verticalTailGeneration;
+    private long _horizontalTailGeneration;
     private DateTime _lastInputUtc = DateTime.MinValue;
     private int _lastDirection;
     private double _acceleration = 1.0;
     private int _isTicking;
-    private bool _disposed;
+    private int _isDrainingInjections;
+    private int _disposed;
 
     public ScrollEngine(AppSettings settings)
     {
@@ -27,6 +36,11 @@ public sealed class ScrollEngine : IDisposable
 
     public void Enqueue(int wheelDelta, bool horizontal)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         var direction = Math.Sign(wheelDelta);
         if (direction == 0)
         {
@@ -34,14 +48,17 @@ public sealed class ScrollEngine : IDisposable
         }
 
         var now = DateTime.UtcNow;
+        var injectionQueued = false;
         lock (_gate)
         {
+            if (Volatile.Read(ref _disposed) != 0)
+            {
+                return;
+            }
+
             if (direction != _lastDirection)
             {
-                _vertical.Clear();
-                _horizontal.Clear();
-                _verticalCarry = 0.0;
-                _horizontalCarry = 0.0;
+                CancelAllAnimationTails();
                 _acceleration = 1.0;
             }
             else if ((now - _lastInputUtc).TotalMilliseconds <= _settings.AccelerationDeltaMs)
@@ -61,64 +78,227 @@ public sealed class ScrollEngine : IDisposable
             var duration = GetDurationMs();
             var list = horizontal ? _horizontal : _vertical;
 
-            list.Add(new ScrollAnimation(now, duration, amount));
-            CoalesceOldAnimations(list, now);
+            if (duration <= 0)
+            {
+                // A zero duration is an immediate physical wheel event. Cancel
+                // the selected axis's old tail only when entering immediate
+                // mode. Consecutive immediate events retain fractional carry.
+                EnterImmediateMode(horizontal);
+
+                var immediateInject = horizontal
+                    ? Quantize(amount, ref _horizontalCarry)
+                    : Quantize(amount, ref _verticalCarry);
+
+                if (immediateInject != 0)
+                {
+                    _pendingInjections.Enqueue(PendingInjection.Immediate(immediateInject, horizontal));
+                    injectionQueued = true;
+                }
+
+                if (_vertical.Count == 0 && _horizontal.Count == 0)
+                {
+                    _timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                }
+            }
+            else
+            {
+                SetImmediateMode(horizontal, enabled: false);
+                list.Add(new ScrollAnimation(now, duration, amount));
+                CoalesceOldAnimations(list, now, duration);
+                _timer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(FrameMs));
+            }
         }
 
-        _timer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(FrameMs));
+        if (injectionQueued)
+        {
+            EnsureInjectionDrain();
+        }
     }
 
     private void Tick(object? state)
     {
-        if (_disposed || Interlocked.Exchange(ref _isTicking, 1) == 1)
+        if (Volatile.Read(ref _disposed) != 0 || Interlocked.Exchange(ref _isTicking, 1) == 1)
         {
             return;
         }
 
+        var injectionQueued = false;
         try
         {
             var now = DateTime.UtcNow;
-            int verticalInject;
-            int horizontalInject;
-            bool active;
 
             lock (_gate)
             {
-                verticalInject = Quantize(StepAxis(_vertical, now), ref _verticalCarry);
-                horizontalInject = Quantize(StepAxis(_horizontal, now), ref _horizontalCarry);
-                active = _vertical.Count > 0 || _horizontal.Count > 0;
-            }
+                if (Volatile.Read(ref _disposed) != 0)
+                {
+                    return;
+                }
 
-            if (verticalInject != 0)
-            {
-                InputInjector.SendWheel(verticalInject, horizontal: false);
-            }
+                // Settings are shared live with the UI. If animation is turned
+                // off while a tail is already running, cancel it on the very
+                // next timer tick instead of letting the old duration finish.
+                if (_settings.AnimationTimeMs <= 0)
+                {
+                    EnterImmediateMode(horizontal: false);
+                    EnterImmediateMode(horizontal: true);
+                    _timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                    return;
+                }
 
-            if (horizontalInject != 0)
-            {
-                InputInjector.SendWheel(horizontalInject, horizontal: true);
-            }
+                var verticalInject = Quantize(StepAxis(_vertical, now), ref _verticalCarry);
+                var horizontalInject = Quantize(StepAxis(_horizontal, now), ref _horizontalCarry);
 
-            if (!active)
-            {
-                _timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                if (verticalInject != 0)
+                {
+                    _pendingInjections.Enqueue(PendingInjection.Animation(
+                        verticalInject,
+                        horizontal: false,
+                        Volatile.Read(ref _verticalTailGeneration)));
+                    injectionQueued = true;
+                }
+
+                if (horizontalInject != 0)
+                {
+                    _pendingInjections.Enqueue(PendingInjection.Animation(
+                        horizontalInject,
+                        horizontal: true,
+                        Volatile.Read(ref _horizontalTailGeneration)));
+                    injectionQueued = true;
+                }
+
+                if (_vertical.Count == 0 && _horizontal.Count == 0)
+                {
+                    _timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                }
             }
         }
         finally
         {
             Interlocked.Exchange(ref _isTicking, 0);
         }
+
+        if (injectionQueued)
+        {
+            EnsureInjectionDrain();
+        }
+    }
+
+    private void CancelAllAnimationTails()
+    {
+        CancelAnimationTail(horizontal: false);
+        CancelAnimationTail(horizontal: true);
+    }
+
+    private void CancelAnimationTail(bool horizontal)
+    {
+        if (horizontal)
+        {
+            _horizontal.Clear();
+            _horizontalCarry = 0.0;
+            Interlocked.Increment(ref _horizontalTailGeneration);
+        }
+        else
+        {
+            _vertical.Clear();
+            _verticalCarry = 0.0;
+            Interlocked.Increment(ref _verticalTailGeneration);
+        }
+    }
+
+    private bool IsImmediateMode(bool horizontal)
+    {
+        return horizontal ? _horizontalImmediateMode : _verticalImmediateMode;
+    }
+
+    private void EnterImmediateMode(bool horizontal)
+    {
+        if (IsImmediateMode(horizontal))
+        {
+            return;
+        }
+
+        CancelAnimationTail(horizontal);
+        SetImmediateMode(horizontal, enabled: true);
+    }
+
+    private void SetImmediateMode(bool horizontal, bool enabled)
+    {
+        if (horizontal)
+        {
+            _horizontalImmediateMode = enabled;
+        }
+        else
+        {
+            _verticalImmediateMode = enabled;
+        }
+    }
+
+    private void EnsureInjectionDrain()
+    {
+        if (Interlocked.CompareExchange(ref _isDrainingInjections, 1, 0) != 0)
+        {
+            return;
+        }
+
+        while (true)
+        {
+            while (_pendingInjections.TryDequeue(out var injection))
+            {
+                if (Volatile.Read(ref _disposed) != 0)
+                {
+                    continue;
+                }
+
+                if (injection.IsCancelable && injection.TailGeneration != GetTailGeneration(injection.Horizontal))
+                {
+                    continue;
+                }
+
+                // Generation validation is the commit point. From here this
+                // single consumer sends the item before every later queue item.
+                // No engine or hook-visible lock is held across SendInput.
+                InputInjector.SendWheel(injection.Delta, injection.Horizontal);
+            }
+
+            Interlocked.Exchange(ref _isDrainingInjections, 0);
+
+            // A producer can enqueue while the drain flag is still set. Recheck
+            // after releasing ownership, then either reacquire it or leave the
+            // new owner to finish the queue.
+            if (_pendingInjections.IsEmpty
+                || Interlocked.CompareExchange(ref _isDrainingInjections, 1, 0) != 0)
+            {
+                return;
+            }
+        }
+    }
+
+    private long GetTailGeneration(bool horizontal)
+    {
+        return horizontal
+            ? Volatile.Read(ref _horizontalTailGeneration)
+            : Volatile.Read(ref _verticalTailGeneration);
     }
 
     private int GetDurationMs()
     {
-        var duration = Math.Clamp(_settings.AnimationTimeMs, 100, 900);
+        if (_settings.AnimationTimeMs <= 0)
+        {
+            return 0;
+        }
+
+        var duration = Math.Clamp(
+            _settings.AnimationTimeMs,
+            AppSettings.MinAnimationTimeMs,
+            AppSettings.MaxAnimationTimeMs);
 
         // Continuous wheel input should keep the previous version's quick feel,
         // while still using a finite curve so the tail does not wobble.
         if (_acceleration > 1.0)
         {
-            duration = (int)Math.Max(120, duration - ((_acceleration - 1.0) * 18));
+            duration = (int)Math.Max(
+                AppSettings.MinAnimationTimeMs,
+                duration - ((_acceleration - 1.0) * 18));
         }
 
         return duration;
@@ -172,7 +352,10 @@ public sealed class ScrollEngine : IDisposable
         return inject;
     }
 
-    private static void CoalesceOldAnimations(List<ScrollAnimation> animations, DateTime now)
+    private static void CoalesceOldAnimations(
+        List<ScrollAnimation> animations,
+        DateTime now,
+        int effectiveDurationMs)
     {
         if (animations.Count <= MaxAnimationsPerAxis)
         {
@@ -189,14 +372,45 @@ public sealed class ScrollEngine : IDisposable
         animations.RemoveRange(0, overflow);
         if (Math.Abs(remaining) >= 0.5)
         {
-            animations.Insert(0, new ScrollAnimation(now, 120, remaining));
+            var tailDuration = Math.Min(MaxCoalescedTailMs, effectiveDurationMs);
+            animations.Insert(0, new ScrollAnimation(now, tailDuration, remaining));
         }
     }
 
     public void Dispose()
     {
-        _disposed = true;
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        lock (_gate)
+        {
+            CancelAllAnimationTails();
+            _verticalImmediateMode = false;
+            _horizontalImmediateMode = false;
+            _timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
+
         _timer.Dispose();
+        EnsureInjectionDrain();
+    }
+
+    private readonly record struct PendingInjection(
+        int Delta,
+        bool Horizontal,
+        bool IsCancelable,
+        long TailGeneration)
+    {
+        public static PendingInjection Immediate(int delta, bool horizontal)
+        {
+            return new PendingInjection(delta, horizontal, IsCancelable: false, TailGeneration: 0);
+        }
+
+        public static PendingInjection Animation(int delta, bool horizontal, long tailGeneration)
+        {
+            return new PendingInjection(delta, horizontal, IsCancelable: true, tailGeneration);
+        }
     }
 
     private sealed class ScrollAnimation

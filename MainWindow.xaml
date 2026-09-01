@@ -400,7 +400,7 @@
                     <Border Margin="0,14,0,0" Padding="12,10" MinHeight="74" CornerRadius="8" Background="{DynamicResource SidebarCardBackground}" BorderBrush="{DynamicResource SidebarCardBorder}" BorderThickness="1">
                         <StackPanel>
                             <TextBlock x:Name="ProfileTitleText" Foreground="{DynamicResource SidebarTextPrimary}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="120 / 540ms / 7x" Foreground="#20C9B3" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                            <TextBlock x:Name="ProfileValueText" Foreground="#20C9B3" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             <TextBlock x:Name="ProfileHelpText" Foreground="{DynamicResource SidebarTextSecondary}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -521,7 +521,7 @@
                                     <TextBlock x:Name="StepSizeText" FontWeight="SemiBold"/>
                                     <TextBlock x:Name="StepSizeValue" DockPanel.Dock="Right" Foreground="{DynamicResource Accent}" FontWeight="SemiBold"/>
                                 </DockPanel>
-                                <Slider Grid.Row="1" x:Name="StepSizeSlider" Minimum="30" Maximum="360" TickFrequency="10" IsSnapToTickEnabled="True" ValueChanged="AnySliderChanged"/>
+                                <Slider Grid.Row="1" x:Name="StepSizeSlider" Minimum="10" Maximum="360" TickFrequency="10" IsSnapToTickEnabled="True" ValueChanged="AnySliderChanged"/>
                                 <TextBlock Grid.Row="2" x:Name="StepSizeHintText" Style="{StaticResource Caption}"/>
                             </Grid>
                             <Grid Margin="18,0,0,16">
@@ -534,7 +534,7 @@
                                     <TextBlock x:Name="AnimationText" FontWeight="SemiBold"/>
                                     <TextBlock x:Name="AnimationValue" DockPanel.Dock="Right" Foreground="{DynamicResource Accent}" FontWeight="SemiBold"/>
                                 </DockPanel>
-                                <Slider Grid.Row="1" x:Name="AnimationSlider" Minimum="80" Maximum="900" TickFrequency="10" IsSnapToTickEnabled="True" ValueChanged="AnySliderChanged"/>
+                                <Slider Grid.Row="1" x:Name="AnimationSlider" Minimum="0" Maximum="900" TickFrequency="10" IsSnapToTickEnabled="True" ValueChanged="AnySliderChanged"/>
                                 <TextBlock Grid.Row="2" x:Name="AnimationHintText" Style="{StaticResource Caption}"/>
                             </Grid>
                             <Grid Margin="0,0,18,16">

@@ -2,7 +2,39 @@
 
 This file keeps product ideas, tuning notes, and future work that should not be lost while SilkWheel is still in beta.
 
+## 2026-09-01 - Formal Windows installer
+
+- Bumped the beta version to `0.1.0-beta.2` / file version `0.1.0.2`.
+- Added a reproducible self-contained publish and Inno Setup build script.
+- Added a stable installer AppId so future packages upgrade the same installation.
+- The installer uses the existing per-user install directory, preserves settings under `%APPDATA%\SilkWheel`, and removes the startup entry on uninstall.
+- Validated legacy in-place upgrade, repeated upgrade, uninstall, and reinstall on Windows: the running copy closed normally, settings hashes stayed unchanged, the uninstall entry was registered, and the new build restarted successfully.
+
 ## Backlog
+
+### Per-App Profiles
+
+Status: scoped follow-up from GitHub Issue #2
+Priority: high for precision and app compatibility
+
+Goal:
+
+Let a foreground application automatically use a saved scroll profile while unmatched applications continue to use the current global settings.
+
+Safety requirements:
+
+- Keep the existing exclusion list higher priority than profile assignments.
+- Match an exact executable path first, with executable-name fallback when the path cannot be read.
+- Snapshot the selected profile when a wheel event is queued so an active animation cannot change parameters mid-tail.
+- Reset acceleration and cancel the previous tail when the foreground target changes, preventing one application's scroll from leaking into another.
+- Fall back to the global settings when an assignment references a missing profile.
+
+Validation plan:
+
+- Bind two applications to visibly different saved profiles and verify automatic switching.
+- Confirm excluded applications still receive native wheel input.
+- Switch applications during an active tail and verify the old tail is cancelled.
+- Restart SilkWheel and verify assignments persist without changing existing settings files.
 
 ### Smart Brake / Precision Mode
 

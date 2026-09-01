@@ -2,6 +2,11 @@ namespace SilkWheel.Services;
 
 public sealed class AppSettings
 {
+    public const double MinStepSize = 10.0;
+    public const double MaxStepSize = 360.0;
+    public const int MinAnimationTimeMs = 10;
+    public const int MaxAnimationTimeMs = 900;
+
     public bool FirstRun { get; set; } = true;
     public bool Enabled { get; set; } = true;
     public double StepSize { get; set; } = 120.0;
@@ -76,8 +81,34 @@ public sealed class AppSettings
         return false;
     }
 
+    public bool NormalizeScrollRanges()
+    {
+        var changed = false;
+        var normalizedStepSize = NormalizeStepSize(StepSize);
+        var normalizedAnimationTime = NormalizeAnimationTime(AnimationTimeMs);
+        if (StepSize != normalizedStepSize)
+        {
+            StepSize = normalizedStepSize;
+            changed = true;
+        }
+
+        if (AnimationTimeMs != normalizedAnimationTime)
+        {
+            AnimationTimeMs = normalizedAnimationTime;
+            changed = true;
+        }
+
+        foreach (var profile in Profiles)
+        {
+            changed |= NormalizeScrollProfile(profile);
+        }
+
+        return changed;
+    }
+
     public void ApplyProfile(ScrollProfile profile)
     {
+        NormalizeScrollProfile(profile);
         ActiveProfileId = profile.Id;
         Enabled = profile.Enabled;
         StepSize = profile.StepSize;
@@ -192,7 +223,34 @@ public sealed class AppSettings
         ActiveProfileId = other.ActiveProfileId;
         Profiles = other.Profiles.Select(profile => profile.Clone()).ToList();
         ExcludedProcesses = new List<string>(other.ExcludedProcesses);
+        NormalizeScrollRanges();
     }
+
+    private static bool NormalizeScrollProfile(ScrollProfile profile)
+    {
+        var changed = false;
+        var normalizedStepSize = NormalizeStepSize(profile.StepSize);
+        var normalizedAnimationTime = NormalizeAnimationTime(profile.AnimationTimeMs);
+        if (profile.StepSize != normalizedStepSize)
+        {
+            profile.StepSize = normalizedStepSize;
+            changed = true;
+        }
+
+        if (profile.AnimationTimeMs != normalizedAnimationTime)
+        {
+            profile.AnimationTimeMs = normalizedAnimationTime;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static double NormalizeStepSize(double value) =>
+        double.IsFinite(value) ? Math.Clamp(value, MinStepSize, MaxStepSize) : 120.0;
+
+    private static int NormalizeAnimationTime(int value) =>
+        value <= 0 ? 0 : Math.Clamp(value, MinAnimationTimeMs, MaxAnimationTimeMs);
 }
 
 public sealed class ThemeProfile

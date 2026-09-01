@@ -78,16 +78,19 @@ Requirements:
 
 - Windows 10/11
 - .NET 8 SDK
+- Inno Setup 6 (`winget install --id JRSoftware.InnoSetup --exact`)
 
 ```powershell
 dotnet build
 dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+./Build-Installer.ps1
 ```
 
 Published files are generated under:
 
 ```text
 bin\Release\net8.0-windows\win-x64\publish
+artifacts\installer\SilkWheel-Setup-<version>-win-x64.exe
 ```
 
 ## Optional Support

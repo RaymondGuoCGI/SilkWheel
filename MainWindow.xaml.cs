@@ -230,8 +230,8 @@ public partial class MainWindow : Window
         AccelerationMaxText.Text = zh ? "最大加速倍数" : "Max acceleration";
         PulseScaleText.Text = zh ? "Pulse 曲线强度" : "Pulse scale";
         LinesText.Text = zh ? "每格滚动行数" : "Lines per notch";
-        StepSizeHintText.Text = zh ? "越大每次滚动越远" : "Higher moves farther per notch";
-        AnimationHintText.Text = zh ? "越大惯性尾巴越长" : "Higher creates a longer glide";
+        StepSizeHintText.Text = zh ? "最低可调到 10；越大每次滚动越远" : "Adjustable down to 10; higher moves farther per notch";
+        AnimationHintText.Text = zh ? "0 表示关闭动画并立即输出设定强度" : "0 turns animation off and sends the configured step immediately";
         AccelerationDeltaHintText.Text = zh ? "连续滚动判定时间" : "Rapid scroll detection window";
         AccelerationMaxHintText.Text = zh ? "快速滚动的速度上限" : "Speed cap for rapid scrolling";
         PulseScaleHintText.Text = zh ? "影响前段响应和尾部缓动" : "Shapes the response and easing tail";
@@ -627,8 +627,15 @@ public partial class MainWindow : Window
             return;
         }
 
+        var zh = _settings.Language == "zh-CN";
+        var animationOff = AnimationSlider.Value <= 0;
+        var animationValue = animationOff
+            ? (zh ? "关闭" : "Off")
+            : $"{AnimationSlider.Value:0} ms";
+        var profileAnimationValue = animationOff ? animationValue : $"{AnimationSlider.Value:0}ms";
+
         StepSizeValue.Text = $"{StepSizeSlider.Value:0}";
-        AnimationValue.Text = $"{AnimationSlider.Value:0} ms";
+        AnimationValue.Text = animationValue;
         AccelerationDeltaValue.Text = $"{AccelerationDeltaSlider.Value:0} ms";
         AccelerationMaxValue.Text = $"{AccelerationMaxSlider.Value:0.0}x";
         PulseScaleValue.Text = $"{PulseScaleSlider.Value:0.00}";
@@ -636,6 +643,7 @@ public partial class MainWindow : Window
         ThemeHueValue.Text = $"{ThemeHueSlider.Value:0}°";
         ThemeSaturationValue.Text = $"{ThemeSaturationSlider.Value:0}%";
         ThemeLightnessValue.Text = $"{ThemeLightnessSlider.Value:0}%";
+        ProfileValueText.Text = $"{StepSizeSlider.Value:0} / {profileAnimationValue} / {AccelerationMaxSlider.Value:0.0}x";
     }
 
     private void AnySettingChanged(object sender, RoutedEventArgs e) => SaveFromControls();
