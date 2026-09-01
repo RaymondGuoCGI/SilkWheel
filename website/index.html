@@ -17,16 +17,19 @@
   <meta property="og:image" content="https://silkwheel.raymondstudio.cn/assets/silkwheel-logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/silkwheel-logo.png">
-  <link rel="stylesheet" href="styles.css?v=20260627-mobile-nav1">
+  <link rel="stylesheet" href="styles.css?v=20260901-releases1">
   <script src="support-config-paypal-20260627.js"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "SilkWheel",
+    "softwareVersion": "0.1.0-beta.2",
     "operatingSystem": "Windows 10, Windows 11",
     "applicationCategory": "UtilitiesApplication",
     "description": "SilkWheel adds smooth mouse wheel scrolling, scroll profiles, app exclusions, tray controls, and theme customization to Windows.",
+    "downloadUrl": "https://silkwheel.raymondstudio.cn/download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe",
+    "releaseNotes": "https://silkwheel.raymondstudio.cn/releases.html",
     "offers": [
       {
         "@type": "Offer",
@@ -47,6 +50,7 @@
     <nav aria-label="Primary navigation">
       <a href="#features" data-i18n="nav.features">Features</a>
       <a href="#pricing" data-i18n="nav.pricing">Pricing</a>
+      <a href="releases.html" data-i18n="nav.releases">Releases</a>
       <a href="#support" data-i18n="nav.support">Support</a>
       <a href="#feedback" data-i18n="nav.feedback">Feedback</a>
       <a href="#faq" data-i18n="nav.faq">FAQ</a>
@@ -61,7 +65,7 @@
           <button type="button" role="menuitemradio" data-lang="zh" aria-checked="false">中文</button>
         </div>
       </div>
-      <a class="nav-download" href="download/SilkWheel-0.1.0-beta.1-win-x64.exe" data-i18n="nav.download">Download</a>
+      <a class="nav-download" href="download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe" data-latest-download data-i18n="nav.download">Download</a>
     </nav>
   </header>
 
@@ -75,7 +79,7 @@
           instant tray control, per-app exclusions, and themes that stay out of your way.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href="download/SilkWheel-0.1.0-beta.1-win-x64.exe" data-i18n="hero.download">Download for Windows</a>
+          <a class="button primary" href="download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe" data-latest-download data-i18n="hero.download">Download for Windows</a>
           <a class="button secondary" href="#pricing" data-i18n="hero.pricing">View pricing</a>
         </div>
         <dl class="trust-row" aria-label="Product highlights">
@@ -155,6 +159,25 @@
       </div>
     </section>
 
+    <section class="section latest-release-section" id="releases">
+      <div class="latest-release-copy">
+        <p class="eyebrow" data-i18n="release.eyebrow">Latest release</p>
+        <h2 data-i18n="release.title">Finer control at the bottom of the dial.</h2>
+        <p data-i18n="release.text">Version 0.1.0-beta.2 adds strength 10, true 0ms movement, safer settings, and the first formal Windows installer.</p>
+        <div class="release-inline-actions">
+          <a class="button primary" href="download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe" data-latest-download data-latest-download-label>Download v0.1.0-beta.2</a>
+          <a class="button secondary" href="releases.html" data-i18n="release.history">View release history</a>
+        </div>
+      </div>
+      <a class="release-signal" href="releases.html" aria-label="Open SilkWheel release history">
+        <span class="signal-label" data-i18n="release.current">Current build</span>
+        <strong data-latest-version>0.1.0-beta.2</strong>
+        <span class="signal-meta" data-i18n="release.meta">September 1, 2026 · Windows x64 · 46.4 MB</span>
+        <span class="signal-track" aria-hidden="true"><i></i></span>
+        <span class="signal-link" data-i18n="release.open">Open release notes →</span>
+      </a>
+    </section>
+
     <section class="section pricing-section" id="pricing">
       <div class="section-heading">
         <p class="eyebrow" data-i18n="pricing.eyebrow">Free beta</p>
@@ -172,7 +195,7 @@
             <li data-i18n="pricing.featureUpdates">Feedback unlock after day 21</li>
             <li data-i18n="pricing.featureLicense">No account or payment required for beta</li>
           </ul>
-          <a class="button primary" href="download/SilkWheel-0.1.0-beta.1-win-x64.exe" data-i18n="pricing.buyYearly">Download beta</a>
+          <a class="button primary" href="download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe" data-latest-download data-i18n="pricing.buyYearly">Download beta</a>
         </article>
         <article class="price-card">
           <h3 data-i18n="pricing.lifetimeTitle">Future Pro</h3>
@@ -286,7 +309,10 @@
 
   <footer class="site-footer">
     <span data-i18n="footer.brand">SilkWheel by Raymond Studio</span>
-    <a href="https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues" target="_blank" rel="noopener" data-i18n="feedback.github">GitHub Issues</a>
+    <div class="footer-links">
+      <a href="releases.html" data-i18n="nav.releases">Releases</a>
+      <a href="https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues" target="_blank" rel="noopener" data-i18n="feedback.github">GitHub Issues</a>
+    </div>
   </footer>
   <script>
     const translations = {
@@ -295,6 +321,7 @@
         metaDescription: "SilkWheel gives Windows mouse wheel scrolling a smooth, controlled glide with profiles, app exclusions, themes, and tray controls.",
         "nav.features": "Features",
         "nav.pricing": "Beta",
+        "nav.releases": "Releases",
         "nav.support": "Support",
         "nav.feedback": "Feedback",
         "nav.faq": "FAQ",
@@ -334,6 +361,14 @@
         "features.themeText": "Choose light, gray, dark, or save your own hue, saturation, and brightness presets.",
         "features.localTitle": "Local desktop utility",
         "features.localText": "No cloud account is required for scrolling. Licensing can be activated separately later.",
+        "release.eyebrow": "Latest release",
+        "release.title": "Finer control at the bottom of the dial.",
+        "release.text": "Version 0.1.0-beta.2 adds strength 10, true 0ms movement, safer settings, and the first formal Windows installer.",
+        "release.download": "Download",
+        "release.history": "View release history",
+        "release.current": "Current build",
+        "release.meta": "September 1, 2026 · Windows x64 · 46.4 MB",
+        "release.open": "Open release notes →",
         "pricing.eyebrow": "Free beta",
         "pricing.title": "Use it first. Help us make the feel better.",
         "pricing.text": "SilkWheel is currently free during beta. After 21 days, share one short feedback note to keep using the current beta version.",
@@ -403,6 +438,7 @@
         metaDescription: "SilkWheel 让 Windows 鼠标滚轮拥有更丝滑、更可控的滚动手感，支持方案、排除应用、托盘控制和主题设置。",
         "nav.features": "功能",
         "nav.pricing": "Beta",
+        "nav.releases": "更新记录",
         "nav.support": "打赏",
         "nav.feedback": "反馈",
         "nav.faq": "常见问题",
@@ -442,6 +478,14 @@
         "features.themeText": "支持亮色、灰色、暗色，也可以保存自己的色相、饱和度和明度方案。",
         "features.localTitle": "本地桌面工具",
         "features.localText": "滚动功能不依赖云端账号。授权体系可以在后续版本中单独接入。",
+        "release.eyebrow": "最新版本",
+        "release.title": "把精细控制带到刻度最底端。",
+        "release.text": "0.1.0-beta.2 新增强度 10、真正的 0ms 即时滚动、更安全的设置保存，以及首个正式 Windows 安装包。",
+        "release.download": "下载",
+        "release.history": "查看更新记录",
+        "release.current": "当前版本",
+        "release.meta": "2026 年 9 月 1 日 · Windows x64 · 46.4 MB",
+        "release.open": "打开版本说明 →",
         "pricing.eyebrow": "免费 Beta",
         "pricing.title": "先让用户用起来，再一起把手感打磨好。",
         "pricing.text": "SilkWheel 当前处于免费 Beta 阶段。完整使用 21 天后，只需提交一次真实使用反馈，即可继续使用当前 Beta 版本。",
@@ -518,6 +562,7 @@
     const feedbackTopic = document.querySelector("#feedbackTopic");
     const feedbackTopicOptions = document.querySelector("#feedbackTopicOptions");
     const feedbackStatus = document.querySelector("#feedbackStatus");
+    let latestReleaseData = null;
 
     function detectLanguage() {
       const urlLang = new URLSearchParams(window.location.search).get("lang");
@@ -580,7 +625,37 @@
       }
       languagePicker?.classList.remove("is-open");
       updateSupportLinks(copy);
+      updateLatestReleaseUi(copy);
       localStorage.setItem("silkwheel-language", lang);
+    }
+
+    function updateLatestReleaseUi(copy) {
+      if (!latestReleaseData) {
+        return;
+      }
+      document.querySelectorAll("[data-latest-download]").forEach((link) => {
+        link.setAttribute("href", latestReleaseData.downloadUrl);
+      });
+      document.querySelectorAll("[data-latest-version]").forEach((node) => {
+        node.textContent = latestReleaseData.version;
+      });
+      document.querySelectorAll("[data-latest-download-label]").forEach((node) => {
+        node.textContent = `${copy["release.download"]} v${latestReleaseData.version}`;
+      });
+    }
+
+    async function loadLatestRelease() {
+      try {
+        const response = await fetch("releases.json", { cache: "no-store" });
+        if (!response.ok) {
+          return;
+        }
+        const manifest = await response.json();
+        latestReleaseData = manifest.releases?.find((release) => release.version === manifest.latest) || manifest.releases?.[0] || null;
+        const lang = document.documentElement.lang === "zh-CN" ? "zh" : "en";
+        updateLatestReleaseUi(translations[lang] || translations.en);
+      } catch {
+      }
     }
 
     function updateSupportLinks(copy) {
@@ -724,6 +799,7 @@
         submitButton?.removeAttribute("disabled");
       }
     });
+    loadLatestRelease();
   </script>
 </body>
 </html>

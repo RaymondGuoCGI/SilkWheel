@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SilkWheel Releases - Version history and downloads</title>
+  <meta name="description" content="SilkWheel release history, Windows downloads, release notes, file sizes, and SHA256 checksums.">
+  <meta name="theme-color" content="#0c1110">
+  <link rel="canonical" href="https://silkwheel.raymondstudio.cn/releases.html">
+  <link rel="alternate" hreflang="en" href="https://silkwheel.raymondstudio.cn/releases.html">
+  <link rel="alternate" hreflang="zh-CN" href="https://silkwheel.raymondstudio.cn/releases.html?lang=zh">
+  <link rel="alternate" hreflang="x-default" href="https://silkwheel.raymondstudio.cn/releases.html">
+  <meta property="og:title" content="SilkWheel Releases">
+  <meta property="og:description" content="Version history, Windows downloads, and checksums for SilkWheel.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://silkwheel.raymondstudio.cn/releases.html">
+  <meta property="og:image" content="https://silkwheel.raymondstudio.cn/assets/silkwheel-logo.png">
+  <link rel="icon" href="assets/silkwheel-logo.png">
+  <link rel="stylesheet" href="styles.css?v=20260901-releases1">
+</head>
+<body class="releases-page">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="SilkWheel home">
+      <img src="assets/silkwheel-logo.png" alt="" width="34" height="34">
+      <span>SilkWheel</span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="index.html#features" data-i18n="nav.features">Features</a>
+      <a href="index.html#pricing" data-i18n="nav.beta">Beta</a>
+      <a class="is-current" href="releases.html" data-i18n="nav.releases">Releases</a>
+      <a href="index.html#feedback" data-i18n="nav.feedback">Feedback</a>
+      <div class="language-picker">
+        <span data-i18n="nav.language">Language</span>
+        <button class="language-button" id="languageButton" type="button" aria-haspopup="true" aria-expanded="false">
+          <span id="languageCurrent">English</span><span class="language-caret" aria-hidden="true">⌄</span>
+        </button>
+        <div class="language-menu" id="languageMenu" role="menu">
+          <button type="button" data-lang="en" role="menuitemradio" aria-checked="true">English</button>
+          <button type="button" data-lang="zh" role="menuitemradio" aria-checked="false">中文</button>
+        </div>
+      </div>
+      <a class="nav-download" href="download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe" data-latest-download data-i18n="nav.download">Download</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="release-hero">
+      <div>
+        <p class="eyebrow" data-i18n="hero.eyebrow">Version history</p>
+        <h1 data-i18n="hero.title">Every notch, accounted for.</h1>
+        <p class="release-hero-text" data-i18n="hero.text">See what changed, when it shipped, and exactly which Windows package you are downloading.</p>
+      </div>
+      <aside class="release-ledger" aria-label="Release record">
+        <span class="ledger-label" data-i18n="hero.ledger">Current release</span>
+        <strong id="latestVersion">0.1.0-beta.2</strong>
+        <span id="latestDate">September 1, 2026</span>
+        <span id="latestPackage">Windows 10/11 x64 · Setup EXE · 46.4 MB</span>
+      </aside>
+    </section>
+
+    <section class="release-stage" aria-labelledby="release-history-title">
+      <div class="release-stage-heading">
+        <div>
+          <p class="eyebrow" data-i18n="history.eyebrow">Release track</p>
+          <h2 id="release-history-title" data-i18n="history.title">From first glide to finer control.</h2>
+        </div>
+        <p data-i18n="history.text">The newest tested build stays at the top. Previous versions remain available for comparison and rollback.</p>
+      </div>
+      <div class="release-rail" id="releaseRail" aria-live="polite">
+        <div class="release-loading" data-i18n="history.loading">Loading release history…</div>
+      </div>
+    </section>
+
+    <section class="release-integrity">
+      <div>
+        <p class="eyebrow" data-i18n="integrity.eyebrow">Before you install</p>
+        <h2 data-i18n="integrity.title">One version, one file, one checksum.</h2>
+      </div>
+      <p data-i18n="integrity.text">The website package mirrors the corresponding GitHub Release. Compare the SHA256 value if you want to verify the download before running it.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span data-i18n="footer.brand">SilkWheel by Raymond Studio</span>
+    <div class="footer-links">
+      <a href="index.html" data-i18n="footer.home">Home</a>
+      <a href="https://github.com/RaymondGuoCGI/SilkWheel/releases" target="_blank" rel="noopener" data-i18n="footer.github">GitHub Releases</a>
+      <a href="https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues" target="_blank" rel="noopener" data-i18n="nav.feedback">Feedback</a>
+    </div>
+  </footer>
+
+  <script src="releases-page.js?v=20260901-releases1"></script>
+</body>
+</html>

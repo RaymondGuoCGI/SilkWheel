@@ -6,7 +6,7 @@
 
 SilkWheel is a lightweight Windows tray utility that turns stepped mouse wheel input into a calmer, smoother, more controllable glide.
 
-[Website](https://silkwheel.raymondstudio.cn/) · [Download](https://github.com/RaymondGuoCGI/SilkWheel/releases/latest) · [Feedback](https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues) · [中文](#中文)
+[Website](https://silkwheel.raymondstudio.cn/) · [Download & Releases](https://silkwheel.raymondstudio.cn/releases.html) · [Feedback](https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues) · [中文](#中文)
 
 > Current status: public beta. Free for 21 days; after that, share one real feedback note to keep using the current beta.
 
@@ -34,9 +34,11 @@ SilkWheel is designed for people who:
 
 ## Download
 
-Get the latest beta from GitHub Releases:
+Get the latest beta and browse previous versions in the release center:
 
-[Download SilkWheel for Windows](https://github.com/RaymondGuoCGI/SilkWheel/releases/latest)
+[Download SilkWheel for Windows](https://silkwheel.raymondstudio.cn/releases.html)
+
+Current release: [v0.1.0-beta.2 on GitHub](https://github.com/RaymondGuoCGI/SilkWheel/releases/tag/v0.1.0-beta.2)
 
 Windows may show a warning because this early beta is not code-signed yet. This is expected for new unsigned desktop apps. The source is public so you can inspect how the app works before running it.
 
@@ -107,7 +109,7 @@ Optional support is welcome, but it is separate from beta access and never requi
 SilkWheel 是一款 Windows 托盘工具，用来把生硬的一格一格鼠标滚轮输入，变成更自然、更稳定、更可控的惯性滑动。
 
 官网：[https://silkwheel.raymondstudio.cn/](https://silkwheel.raymondstudio.cn/)<br>
-下载：[GitHub Releases](https://github.com/RaymondGuoCGI/SilkWheel/releases/latest)<br>
+下载与版本记录：[官网 Releases](https://silkwheel.raymondstudio.cn/releases.html)<br>
 反馈：[SilkWheel Feedback](https://github.com/RaymondGuoCGI/SilkWheel-Feedback/issues)
 
 ### 适合谁

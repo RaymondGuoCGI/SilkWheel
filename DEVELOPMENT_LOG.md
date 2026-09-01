@@ -2,6 +2,14 @@
 
 This file keeps product ideas, tuning notes, and future work that should not be lost while SilkWheel is still in beta.
 
+## 2026-09-01 - Website release center
+
+- Added a bilingual Releases page backed by `website/releases.json`.
+- Homepage download links now resolve to the latest release package.
+- Release history records date, package type, size, SHA256, notes, and GitHub Release URL.
+- The private feedback dashboard now groups estimated downloads by package filename and keeps raw request diagnostics separate.
+- Deployment keeps versioned installers in the VPS `download/` directory and never deletes feedback data or authentication configuration.
+
 ## 2026-09-01 - Formal Windows installer
 
 - Bumped the beta version to `0.1.0-beta.2` / file version `0.1.0.2`.

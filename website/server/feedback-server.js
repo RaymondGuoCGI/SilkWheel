@@ -258,6 +258,69 @@ function collapseDownloadSessions(entries) {
   }));
 }
 
+function normalizeDownloadUrl(value) {
+  try {
+    return new URL(String(value || ""), "https://silkwheel.raymondstudio.cn").pathname;
+  } catch {
+    return String(value || "").split("?")[0];
+  }
+}
+
+function summarizeDownloadsByFile(downloads, humanSessions, botSessions) {
+  const summaries = new Map();
+  const getSummary = (url) => {
+    const normalizedUrl = normalizeDownloadUrl(url);
+    const encodedFileName = normalizedUrl.split("/").filter(Boolean).pop() || normalizedUrl;
+    let fileName = encodedFileName;
+    try {
+      fileName = decodeURIComponent(encodedFileName);
+    } catch {
+    }
+    if (!summaries.has(normalizedUrl)) {
+      summaries.set(normalizedUrl, {
+        url: normalizedUrl,
+        fileName,
+        totalRequests: 0,
+        likelyHuman: 0,
+        likelyBot: 0,
+        uniqueIps: new Set(),
+        lastTimestamp: 0,
+        lastTime: ""
+      });
+    }
+    return summaries.get(normalizedUrl);
+  };
+
+  for (const entry of downloads) {
+    getSummary(entry.url).totalRequests += 1;
+  }
+  for (const session of humanSessions) {
+    const summary = getSummary(session.url);
+    summary.likelyHuman += 1;
+    summary.uniqueIps.add(session.ip);
+    if ((session.lastTimestamp || 0) >= summary.lastTimestamp) {
+      summary.lastTimestamp = session.lastTimestamp || 0;
+      summary.lastTime = session.lastTime || session.time || "";
+    }
+  }
+  for (const session of botSessions) {
+    getSummary(session.url).likelyBot += 1;
+  }
+
+  return [...summaries.values()]
+    .map((summary) => ({
+      url: summary.url,
+      fileName: summary.fileName,
+      totalRequests: summary.totalRequests,
+      likelyHuman: summary.likelyHuman,
+      likelyBot: summary.likelyBot,
+      uniqueIpCount: summary.uniqueIps.size,
+      lastTimestamp: summary.lastTimestamp,
+      lastTime: summary.lastTime
+    }))
+    .sort((a, b) => b.lastTimestamp - a.lastTimestamp || a.fileName.localeCompare(b.fileName));
+}
+
 async function loadDownloadStats(limit = 10) {
   try {
     const logDir = path.dirname(ACCESS_LOG_FILE);
@@ -296,7 +359,7 @@ async function loadDownloadStats(limit = 10) {
       .filter(Boolean)
       .map(parseAccessLogLine)
       .filter(Boolean)
-      .map((entry) => ({ ...entry, timestamp: parseAccessLogTime(entry.time) }))
+      .map((entry) => ({ ...entry, url: normalizeDownloadUrl(entry.url), timestamp: parseAccessLogTime(entry.time) }))
       .filter((entry) => entry.method === "GET" && entry.status >= 200 && entry.status < 400 && entry.url.startsWith("/download/"));
 
     const botDownloads = downloads.filter((entry) => isLikelyBot(entry.userAgent));
@@ -310,6 +373,7 @@ async function loadDownloadStats(limit = 10) {
       likelyHuman: humanSessions.length,
       likelyBot: botSessions.length,
       uniqueIpCount: uniqueIps.size,
+      byVersion: summarizeDownloadsByFile(downloads, humanSessions, botSessions),
       recent: humanSessions.slice(-limit).reverse()
     };
   } catch (error) {
@@ -318,6 +382,7 @@ async function loadDownloadStats(limit = 10) {
       likelyHuman: 0,
       likelyBot: 0,
       uniqueIpCount: 0,
+      byVersion: [],
       recent: [],
       error: error.code === "ENOENT" ? "No access log yet." : error.message
     };
@@ -363,6 +428,21 @@ async function handleAdminDashboard(req, res) {
       </details>
     </article>
   `).join("");
+  const versionRows = downloadStats.byVersion.map((item) => `
+    <article class="version-row">
+      <div>
+        <strong>${escapeHtml(item.fileName || item.url || "-")}</strong>
+        <span>${escapeHtml(item.url || "-")}</span>
+      </div>
+      <div class="version-metrics">
+        <span><b>${item.likelyHuman}</b> estimated human</span>
+        <span><b>${item.uniqueIpCount}</b> unique IP${item.uniqueIpCount === 1 ? "" : "s"}</span>
+        <span><b>${item.totalRequests}</b> raw request${item.totalRequests === 1 ? "" : "s"}</span>
+        <span><b>${item.likelyBot}</b> bot / automation</span>
+      </div>
+      <small>Last human download: ${escapeHtml(item.lastTime || "-")}</small>
+    </article>
+  `).join("");
 
   sendHtml(res, 200, `<!doctype html>
 <html lang="en">
@@ -390,6 +470,15 @@ async function handleAdminDashboard(req, res) {
     .message { white-space: pre-wrap; line-height: 1.65; margin: 16px 0; }
     .download-list { max-width: 1120px; margin: 0 auto 20px; display: grid; gap: 10px; }
     .download-list h2 { margin: 8px 0 0; }
+    .version-list { max-width: 1120px; margin: 0 auto 22px; display: grid; gap: 10px; }
+    .version-list h2 { margin: 8px 0 0; }
+    .version-row { display: grid; gap: 12px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+    .version-row > div:first-child { display: grid; gap: 3px; }
+    .version-row strong { overflow-wrap: anywhere; }
+    .version-row span, .version-row small { color: var(--muted); font-size: 12px; }
+    .version-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .version-metrics span { padding: 10px; background: rgba(255,255,255,.025); border: 1px solid var(--line); border-radius: 10px; }
+    .version-metrics b { display: block; color: var(--accent); font-size: 20px; }
     .download-note { color: var(--muted); font-size: 13px; margin: -2px 0 4px; }
     .diagnostics { max-width: 1120px; margin: -6px auto 18px; color: var(--muted); font-size: 13px; }
     .diagnostics summary { display: inline-flex; color: var(--accent); }
@@ -399,7 +488,7 @@ async function handleAdminDashboard(req, res) {
     summary { cursor: pointer; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); }
     a { color: var(--accent); }
-    @media (max-width: 720px) { body { padding: 20px; } header { align-items: flex-start; flex-direction: column; } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 720px) { body { padding: 20px; } header { align-items: flex-start; flex-direction: column; } .stats, .version-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
@@ -414,6 +503,10 @@ async function handleAdminDashboard(req, res) {
     <div class="stat"><strong>${items.length}</strong><span>feedback submissions</span></div>
     <div class="stat"><strong>${downloadStats.likelyHuman}</strong><span>estimated human downloads</span></div>
     <div class="stat"><strong>${downloadStats.uniqueIpCount}</strong><span>unique downloader IPs</span></div>
+  </section>
+  <section class="version-list">
+    <h2>Downloads by version</h2>
+    ${versionRows || '<div class="empty">No versioned downloads yet.</div>'}
   </section>
   <details class="diagnostics">
     <summary>Diagnostics</summary>

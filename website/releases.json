@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "latest": "0.1.0-beta.2",
+  "releases": [
+    {
+      "version": "0.1.0-beta.2",
+      "tag": "v0.1.0-beta.2",
+      "channel": "beta",
+      "status": "latest",
+      "publishedAt": "2026-09-01T05:44:07Z",
+      "platform": "Windows 10/11 x64",
+      "packageType": "Setup EXE",
+      "fileName": "SilkWheel-Setup-0.1.0-beta.2-win-x64.exe",
+      "downloadUrl": "download/SilkWheel-Setup-0.1.0-beta.2-win-x64.exe",
+      "githubUrl": "https://github.com/RaymondGuoCGI/SilkWheel/releases/tag/v0.1.0-beta.2",
+      "sizeBytes": 48612914,
+      "sha256": "931C2A62DF3F202635E96328609ADA5CC98ACA88E33E639A26E0EF686B8C396D",
+      "notes": {
+        "en": {
+          "headline": "Precision at the bottom of the dial.",
+          "summary": "Finer scroll strength, true zero-duration movement, safer settings, and the first formal Windows installer.",
+          "new": [
+            "Single-scroll strength now reaches 10 instead of stopping at 30.",
+            "Animation duration now supports 0 ms for immediate configured movement.",
+            "A formal per-user Windows installer now supports upgrades and uninstall."
+          ],
+          "improved": [
+            "Low positive durations stay exactly where the user sets them.",
+            "Settings are written through a same-directory temporary file before replacement.",
+            "Existing settings remain in place during install, upgrade, and uninstall."
+          ],
+          "fixed": [
+            "Old animation tails are cancelled when switching to 0 ms or changing direction.",
+            "Horizontal, reverse, and consecutive immediate scrolling keep the correct amount."
+          ]
+        },
+        "zh": {
+          "headline": "把精细控制带到刻度最底端。",
+          "summary": "更低的滚动强度、真正的 0ms 即时滚动、更安全的设置保存，以及首个正式 Windows 安装包。",
+          "new": [
+            "单次滚动强度最低值由 30 调整为 10。",
+            "动画时长支持 0ms，立即发送当前配置的滚动量。",
+            "新增正式的当前用户 Windows 安装包，支持升级和卸载。"
+          ],
+          "improved": [
+            "较低的正动画时长会严格保留用户设置。",
+            "设置文件先写入同目录临时文件，再安全覆盖。",
+            "安装、升级和卸载过程中保留原有用户设置。"
+          ],
+          "fixed": [
+            "切换到 0ms 或改变方向时会取消旧动画尾巴。",
+            "修复水平、反向和连续即时滚动的步进量。"
+          ]
+        }
+      }
+    },
+    {
+      "version": "0.1.0-beta.1",
+      "tag": "v0.1.0-beta.1",
+      "channel": "beta",
+      "status": "previous",
+      "publishedAt": "2026-06-27T07:32:04Z",
+      "platform": "Windows 10/11 x64",
+      "packageType": "Portable EXE",
+      "fileName": "SilkWheel-0.1.0-beta.1-win-x64.exe",
+      "downloadUrl": "download/SilkWheel-0.1.0-beta.1-win-x64.exe",
+      "githubUrl": "https://github.com/RaymondGuoCGI/SilkWheel/releases/tag/v0.1.0-beta.1",
+      "sizeBytes": 153824994,
+      "sha256": "AF6CAA76B616FD46217E51EE711395991E8A495BF0C3D279F3D28EADB08FBF23",
+      "notes": {
+        "en": {
+          "headline": "The first public glide.",
+          "summary": "The initial public beta introduced system-wide smoothing, profiles, app exclusions, tray controls, and bilingual themes.",
+          "new": [
+            "System-wide smooth mouse wheel scrolling for Windows 10/11.",
+            "Quick, medium, native, and custom tuning profiles.",
+            "Per-app exclusions, tray controls, and Chinese/English UI."
+          ],
+          "improved": [],
+          "fixed": []
+        },
+        "zh": {
+          "headline": "第一次公开的丝滑滚动。",
+          "summary": "首个公开测试版带来了全局平滑滚动、手感方案、应用排除、托盘控制和双语主题。",
+          "new": [
+            "支持 Windows 10/11 的全局鼠标滚轮平滑处理。",
+            "提供快速、中速、原生与自定义手感方案。",
+            "支持应用排除、托盘控制和中英文界面。"
+          ],
+          "improved": [],
+          "fixed": []
+        }
+      }
+    }
+  ]
+}
